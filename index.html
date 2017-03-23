@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>WJoan的个人作品集</title>
+	<meta charset="utf-8">
+	<title>WJoan的前端学习之路</title>
 </head>
 <body>
-Hello World
+	<p style="display: none;">relative是相当于正常文档流定位的偏移，或者说相对于原位置的偏移，原来的位置依然被占用，包含在父元素的content中。
+	absolute是相对于已经定位的最近父元素的绝对定位，默认的static是没有定位的。包含在边框内部，也就是说会忽略已定位的父元素的padding值。由于已经脱离了正常文档流，所以原本的位置也不再占用。绝对定位元素会覆盖其他元素，其他元素就当其不存在正常排版。
+	float会使得脱离正常文档流，在原本的位置想左右浮动，原来的位置不再占用，其他元素重新排版，只是遇到float元素时候会被挤开。浮动的元素无法撑开其父元素的高度，导致父元素高度的塌陷。解决方案：1、设置父元素高度；2、设置父元素的overflow:hidden属性；3、在父级结尾处加一个带clear:both属性的div。</p>
+	<a href="baidu_echarts/weather.html">echarts</a>
 </body>
 </html>
