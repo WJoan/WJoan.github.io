@@ -1,10 +1,11 @@
 ---
-layout: default
+layout: pages
+title: Blog
 ---
-{% include header.html %}
-<section id="about">
-{% include about.html %}
-</section>
-<section id="projects">
-{% include projects.html %}
-</section>
+<h2>{{ page.title }}</h2>
+<p>最新文章</p>　　
+<ul>
+	{% for post in site.posts %}
+　　<li>{{ post.date | date_to_string }} <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+　　{% endfor %}
+</ul>
