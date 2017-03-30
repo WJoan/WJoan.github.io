@@ -1,19 +1,25 @@
 # Site settings
-title: Joan's personal blog
-description: A blog about front-end technology
-# baseurl: "/particle" # the subpath of your site, e.g. /blog
-# url: "localhost:3000" # the base hostname & protocol for your site e.g. http://willianjusten.com.br
+title: Clean Blog
+header-img: img/home-bg.jpg
+email: your-email@yourdomain.com
+copyright_name: Your/Project/Corporate Name
+description: "Write your site description here. It will be used as your sites meta description as well!"
+baseurl: "/startbootstrap-clean-blog-jekyll"
+url: "http://yourdomain.com"
+twitter_username: SBootstrap
+github_username:  davidtmiller
+facebook_username:  StartBootstrap
+email_username:  your-email@yourdomain.com
 
-# User settings
-username: Wang Jing
-user_description: 1993年出生于北京，18岁来到武汉。本科、研究生均在华中科技大学计算机学院就读。热衷于前端开发。
-email: joanwang822@qq.com
-weibo_username: wjoan822
-github_username:  WJoan
-gplus_username:  none
+# Google Analytics
+# To enable google analytics, uncomment below line with a valid Google Tracking ID
+# google_tracking_id:
 
-# Google-analytics
-google-analytics:
-  id: ""
+# Build settings
+markdown: kramdown
+highlighter: rouge
+permalink: pretty
+paginate: 5
+exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
 
-exclude: ['package.json', 'src' , 'node_modules']
+gems: [jekyll-paginate, jekyll-feed]
