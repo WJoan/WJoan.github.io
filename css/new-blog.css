@@ -1,6 +1,8 @@
 #particles-js {
 	position: relative;
 	background-color: #000000;
+	width: 100vw !important;
+    height: 80vh !important;
 }
 
 #particles-js > .container {
@@ -8,9 +10,4 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%,-50%);
-}
-
-#particles-js > #particles-js-canvas-el {
-	width: 100vw!important;
-    height: 80vh!important;
 }

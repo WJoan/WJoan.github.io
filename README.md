@@ -5,3 +5,6 @@ This personal blog is build based on a Jekyll Theme Clean Blog. This theme is si
 
 ### [View Live Clean Blog Demo &rarr;](http://blackrockdigital.github.io/startbootstrap-clean-blog-jekyll/)
 
+### [](https://github.com/nrandecker/particle)
+
+### [](https://github.com/VincentGarreau/particles.js)
