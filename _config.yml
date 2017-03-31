@@ -2,13 +2,13 @@
 title: WJoan Blog
 header-img: img/home-bg.jpg
 email: wjoan822@qq.com
-copyright_name: WJoan/WJoan.github.io/
-description: "A blog about font-end technology"
+copyright_name: WJoan/WJoan.github.io
+description: "前端技术博客"
 baseurl: ""
 url: "https://wjoan.github.io"
 weibo_username: wjoan822
 github_username: WJoan
-email_username: wjoan822@qq.com
+email_username: joanwang822@qq.com
 
 # Google Analytics
 # To enable google analytics, uncomment below line with a valid Google Tracking ID
