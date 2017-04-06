@@ -1,8 +1,8 @@
 ---
 layout:     post
 title:      "网络知识"
-subtitle:   "一些关于CSS的设计思想"
-date:       2017-04-01 21:54:00
+subtitle:   "计算机网络基础知识"
+date:       2017-04-06 16:34:23
 author:     "Joan"
 tags:		"网络"
 ---
@@ -12,16 +12,19 @@ tags:		"网络"
 以下两篇文章来自阮一峰的博客，它们分别自底向上、自顶向下的介绍了计算机网络的构成。是非常好的入门文章，也可以帮助学习过网络知识的同学梳理清晰计算机网络的整体脉络。
 
 [-> 互联网协议入门(1)](http://www.ruanyifeng.com/blog/2012/05/internet_protocol_suite_part_i.html)
+
 [-> 互联网协议入门(2)](http://www.ruanyifeng.com/blog/2012/06/internet_protocol_suite_part_ii.html)
 
 
 # 各层协议
 
 ## 总结
+
 TCP/IP协议族分为四部分：应用层、传输层、网络层、网络接口层（数据链路层+物理层）。
 OSI有七层，分别为：应用层、表示层、会话层、传输层、网络层、数据链路层、物理层。
+
 |OSI中的层|功能|TCP/IP协议族|
-|:--|:--|:--|
+|:--------|:---|:-----------|
 |应用层|文件传输，电子邮件，文件服务，虚拟终端|TFTP，`HTTP`，SNMP，`FTP`，SMTP，`DNS`，Telnet 等等|
 |表示层|数据格式化，代码转换，数据加密|没有协议|
 |会话层|解除或建立与别的接点的联系|没有协议|
@@ -31,19 +34,26 @@ OSI有七层，分别为：应用层、表示层、会话层、传输层、网�
 |物理层|以二进制数据形式在物理媒体上传输数据|ISO2110，IEEE802，`IEEE802.2`|
 
 ## 网络层
+
 网络层包括：
+
 * IP(Internet Protocol）协议
 * ICMP(Internet Control Message Protocol)控制报文协议
 * ARP(Address Resolution Protocol）地址转换协议
 * RARP(Reverse ARP)反向地址转换协议。
+
 IP是网络层的核心，通过路由选择将下一条IP封装后交给接口层。IP数据报是`无连接服务`。
 ICMP是网络层的补充，可以回送报文。用来检测网络是否通畅。Ping命令就是发送ICMP的echo包，通过回送的echo relay进行网络测试。
 
 ## 传输层
+
 传输层协议主要包括：
+
 - TCP(Transmission Control Protocol）传输控制协议
 - UDP(User Datagram protocol）用户数据报协议
+
 **TCP与UDP的区别**
+
 |TCP|UDP|
 |---|---|
 |TCP是`面向连接`的通信协议，只能用于`端到端`的通讯，更加`安全`|UDP是面向`无连接`的通讯协议，可以实现`广播`发送，容易被欺骗、不安全|
@@ -52,17 +62,20 @@ ICMP是网络层的补充，可以回送报文。用来检测网络是否通畅�
 |面向连接的服务（例如Telnet、FTP、rlogin、X Windows和SMTP）需要`高度的可靠性`，所以它们使用了TCP。DNS在某些情况下使用TCP（发送和接收域名数据库）|UDP主要用于那些面向`查询-应答`这样的`信息量交换较少`的服务。使用UDP的服务包括NTP（网络时间协议）和DNS（DNS也使用TCP）|
 
 ## 应用层
+
 应用层协议主要包括如下几个：
-FTP(File Transfer Protocol）是文件传输协议，一般上传下载用FTP服务，数据端口是20H，控制端口是21H。
-Telnet服务是用户远程登录服务，使用23H端口，使用明码传送，保密性差、简单方便。
-DNS(Domain Name Service）是域名解析服务，提供域名到IP地址之间的转换，使用端口53。
-SMTP(Simple Mail Transfer Protocol）是简单邮件传输协议，用来控制信件的发送、中转，使用端口25。
-NFS（Network File System）是网络文件系统，用于网络中不同主机间的文件共享。
-HTTP(Hypertext Transfer Protocol）是超文本传输协议，用于实现互联网中的WWW服务，使用端口80。
+
+- FTP(File Transfer Protocol）是文件传输协议，一般上传下载用FTP服务，数据端口是20H，控制端口是21H。
+- Telnet服务是用户远程登录服务，使用23H端口，使用明码传送，保密性差、简单方便。
+- DNS(Domain Name Service）是域名解析服务，提供域名到IP地址之间的转换，使用端口53。
+- SMTP(Simple Mail Transfer Protocol）是简单邮件传输协议，用来控制信件的发送、中转，使用端口25。
+- NFS（Network File System）是网络文件系统，用于网络中不同主机间的文件共享。
+- HTTP(Hypertext Transfer Protocol）是超文本传输协议，用于实现互联网中的WWW服务，使用端口80。
 
 # 当你在浏览器输入回车后发生了什么
 
 这是一道非常经典的面试题。
+
 https://github.com/skyline75489/what-happens-when-zh_CN
 
 # DNS
@@ -70,16 +83,21 @@ https://github.com/skyline75489/what-happens-when-zh_CN
 # TCP
 
 ## TCP三次握手和四次挥手
-http://www.2cto.com/net/201310/251896.html
-无论是三次握手还是四次挥手，双方都进行了两个来回的“沟通”，即SYN/FIN、ACK、SYN/FIN、ACK。只是在三次握手中，server的发送的`SYN`以及`ACK`一起发送了。其中发送`SYN`或者`FIN`的时候需要跟随一个`seq`（序列号），返回`ACK`的时候需要附带一个`ack`=seq+1(即接收方期望接收的下一个序列号)。
-<a href="#">
-    <img src="{{ site.baseurl }}/img/post-sample-image.jpg" alt="Post Sample Image">
-</a>
-![三次握手](http://www.2cto.com/uploadfile/2013/1022/20131022025346218.png)
 
-![四次挥手](http://www.2cto.com/uploadfile/2013/1022/20131022025350523.png)
+无论是三次握手还是四次挥手，双方都进行了两个来回的“沟通”，即SYN/FIN、ACK、SYN/FIN、ACK。只是在三次握手中，server的发送的`SYN`以及`ACK`一起发送了。其中发送`SYN`或者`FIN`的时候需要跟随一个`seq`（序列号），返回`ACK`的时候需要附带一个`ack`=seq+1(即接收方期望接收的下一个序列号)。[详细过程>>](http://www.2cto.com/net/201310/251896.html)
+
+<a href="#">
+    <img src="{{ site.baseurl }}/img/network-tcp-3.jpg" alt="network-tcp-3">
+</a>
+
+
+<a href="#">
+    <img src="{{ site.baseurl }}/img/network-tcp-4.jpg" alt="network-tcp-4">
+</a>
+
 ### 客户端TCP状态迁移：
 CLOSED->SYN_SENT->ESTABLISHED->FIN_WAIT_1->FIN_WAIT_2->TIME_WAIT->CLOSED
+
 ### 服务器TCP状态迁移：
 CLOSED->LISTEN->SYN收到->ESTABLISHED->CLOSE_WAIT->LAST_ACK->CLOSED
 
