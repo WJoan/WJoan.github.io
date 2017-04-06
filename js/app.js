@@ -1,5 +1,5 @@
 /* sweetScroll load */
-if(getElementsByClassName('particles-js')){
+if(document.getElementsByClassName('particles-js')){
   document.addEventListener("DOMContentLoaded", function () {
     /* particlesJS.load(@dom-id, @path-json, @callback (optional)); */
     particlesJS('particles-js', {
