@@ -87,7 +87,7 @@ https://github.com/skyline75489/what-happens-when-zh_CN
 无论是三次握手还是四次挥手，双方都进行了两个来回的“沟通”，即SYN/FIN、ACK、SYN/FIN、ACK。只是在三次握手中，server的发送的`SYN`以及`ACK`一起发送了。其中发送`SYN`或者`FIN`的时候需要跟随一个`seq`（序列号），返回`ACK`的时候需要附带一个`ack`=seq+1(即接收方期望接收的下一个序列号)。[详细过程>>](http://www.2cto.com/net/201310/251896.html)
 
 <a href="#">
-    <img src="{{ site.baseurl }}/img/network-tcp-3.jpg" alt="network-tcp-3">
+    <img src="{{ site.baseurl }}/img/network-tcp-3.png" alt="network-tcp-3">
 </a>
 
 
