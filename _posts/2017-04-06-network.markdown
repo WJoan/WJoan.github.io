@@ -92,7 +92,7 @@ https://github.com/skyline75489/what-happens-when-zh_CN
 
 
 <a href="#">
-    <img src="{{ site.baseurl }}/img/network-tcp-4.jpg" alt="network-tcp-4">
+    <img src="{{ site.baseurl }}/img/network-tcp-4.png" alt="network-tcp-4">
 </a>
 
 ### 客户端TCP状态迁移：
