@@ -6,16 +6,24 @@ author:     "Joan"
 ---
 
 # 参考资料
+
+
 前端学习中遇到一些比较实用的工具和资料（不定期更新）
 
 ### Web基础知识
+
 [基本名词解释](https://www.zhihu.com/question/22689579)
 
 [在浏览器地址栏输入url回车后发生了什么1](https://github.com/skyline75489/what-happens-when-zh_CN)
+
 [在浏览器地址栏输入url回车后发生了什么2](https://zhuanlan.zhihu.com/p/23155051)
+
 [在浏览器地址栏输入url回车后发生了什么3](https://www.zhihu.com/question/34873227)
 
+[正则表达式](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions)
+
 ### 工具使用
+
 [GitHub使用简介](http://www.worldhello.net/gotgithub/)
 
 [GitHub Pages & Jekyll构建个人网站](http://www.ruanyifeng.com/blog/2012/08/blogging_with_jekyll.html)
@@ -27,11 +35,13 @@ author:     "Joan"
 [Font Awesome 中文网](http://www.fontawesome.com.cn/)
 
 ### JavaScript语法
+
 [JS 定时器](http://javascript.ruanyifeng.com/advanced/timer.html)
 
 [DOM基本操作](http://javascript.ruanyifeng.com/dom/node.html)
 
 ### CSS基本操作
+
 [nth-child选择器](http://www.daqianduan.com/3737.html)
 
 [margin负值应用](http://www.daqianduan.com/6239.html)
@@ -39,6 +49,7 @@ author:     "Joan"
 [CSS三栏式布局的7种方法](https://zhuanlan.zhihu.com/p/25070186?refer=learncoding)
 
 [Flex布局教程_语法](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)
+
 [Flex布局教程_案例](http://www.ruanyifeng.com/blog/2015/07/flex-examples.html)
 
 [overflow:hidden清除浮动的原理](https://www.zhihu.com/question/30938856)
@@ -52,6 +63,7 @@ author:     "Joan"
 [CSS居中代码生成器](http://howtocenterincss.com/)
 
 ### 内存问题
+
 [调试(Chrome)](https://developers.google.com/web/tools/chrome-devtools/memory-problems/)
 
 [Jquery导致的内存泄漏](http://zouzaibianyuan.iteye.com/blog/1933904)
