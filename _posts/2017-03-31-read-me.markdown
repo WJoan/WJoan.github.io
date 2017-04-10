@@ -20,7 +20,9 @@ author:     "Joan"
 
 [在浏览器地址栏输入url回车后发生了什么3](https://www.zhihu.com/question/34873227)
 
-[正则表达式](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions)
+[正则表达式入门](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions)
+
+[学习正则表达式](http://deerchao.net/tutorials/regex/regex-1.htm)
 
 ### 工具使用
 
