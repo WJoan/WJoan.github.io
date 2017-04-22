@@ -10,6 +10,8 @@ header-img: "img/contact-bg.jpg"
 	    data = JSON.parse(dataStr),
 	    curTag = $.query.get("tag"),
 	    archieves = data[curTag];
+
+	    console.log(archieves);
 </script>
 
 {% for tag in site.tags %}
