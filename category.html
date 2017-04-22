@@ -6,5 +6,9 @@ header-img: "img/contact-bg.jpg"
 ---
 
 {% for tag in site.tags %}
-    <a href="/category.html?tag={{ tag[0] }}"> {{ tag[0] }}</a>
+    <a href="#{{ tag[0] }}"> {{ tag[0] }}</a>
+{% endfor %}
+
+{% for tag in site.tags %}
+    <h2 id="{{ tag[0] }}">{{ tag[0] }}</h2>
 {% endfor %}
