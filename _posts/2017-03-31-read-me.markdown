@@ -3,6 +3,7 @@ layout:     post
 title:      "前端资料汇总"
 date:       2017-04-01 21:30:00
 author:     "Joan"
+categorie:  "基础"
 ---
 
 # 参考资料
