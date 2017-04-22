@@ -11,4 +11,7 @@ header-img: "img/contact-bg.jpg"
 
 {% for tag in site.tags %}
     <h2 id="{{ tag[0] }}">{{ tag[0] }}</h2>
+    {% for post in tag[1] %} 
+		<a>{{ post.title }}</a><br/>
+	{% endfor %}
 {% endfor %}
