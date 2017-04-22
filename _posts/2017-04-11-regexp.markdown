@@ -4,7 +4,7 @@ title:      "正则表达式"
 subtitle:   "计算机网络基础知识"
 date:       2017-04-11 21:54:15
 author:     "Joan"
-categories:	["正则表达式","基础"]
+tags:	["正则表达式","基础"]
 ---
 
 # 特殊字符
