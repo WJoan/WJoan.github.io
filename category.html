@@ -5,18 +5,24 @@ description: "category"
 header-img: "img/contact-bg.jpg"
 ---
 
-{% for tag in site.tags %}
-    <a href="#{{ tag[0] }}"> {{ tag[0] }}</a>
-{% endfor %}
-
+<!-- category page -->
+<!-- all tags -->
+<div class="category">
+	{% for tag in site.tags %}
+    	<a href="#{{ tag[0] }}"> {{ tag[0] }}</a>
+	{% endfor %}
+</div>
+<!-- the article list of each tag -->
+<div class="category-lists">
 {% for tag in site.tags %}
     <h2 id="{{ tag[0] }}">{{ tag[0] }}</h2>
 	<ul>
 		{% for post in tag[1] %}
 		<li>
-			<time datetime="{{ post.date | date_to_string }}">{{ post.date | date_to_string}}</time>
 			<a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a>
+			<time datetime="{{ post.date | date_to_string }}">{{ post.date | date_to_string}}</time>
 		</li>
 		{% endfor %}
 	</ul>
 {% endfor %}
+</div>

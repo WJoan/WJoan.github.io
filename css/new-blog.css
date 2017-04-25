@@ -11,3 +11,15 @@
     left: 50%;
     transform: translate(-50%,-50%);
 }
+
+.category > a{
+	background-color: #9E9E9E;
+    color: #fff;
+    border-radius: 5px;
+    padding: 0.2em;
+}
+
+.category > a:hover {
+	text-decoration: none;
+	background-color: #ff9800;
+}
