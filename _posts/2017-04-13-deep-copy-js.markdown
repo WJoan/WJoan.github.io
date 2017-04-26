@@ -1,9 +1,9 @@
 ---
 layout:     post
-title:      "深拷贝与浅拷贝"
+title:      "JS中的深拷贝与浅拷贝"
 date:       2017-04-13 16:07:45
 author:     "Joan"
-tags:		["JS","Jquery","你不知道的JavaScript","读书笔记"]
+tags:		["JS","《你不知道的JavaScript》读书笔记"]
 ---
 
 
