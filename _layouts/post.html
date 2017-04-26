@@ -13,11 +13,11 @@ layout: default
                     <h2 class="subheading">{{ page.subtitle }}</h2>
                     {% endif %}
                     {% if page.tags %}
-                        {% for tag in page.tags %}
-                        <div class="category">
-                            <a href="{{ site.baseurl }}/category/#{{ tag }}"> {{ tag }}</a>
-                        </div>
+                    <div class="category">
+                        {% for tag in page.tags %}    
+                        <a href="{{ site.baseurl }}/category/#{{ tag }}"> {{ tag }}</a>
                         {% endfor %}
+                    </div>
                     {% endif %}
                     <span class="meta">作者 {% if page.author %}{{ page.author }}{% else %}{{ site.title }}{% endif %} 发布时间 {{ page.date | date: "%B %-d, %Y" }}</span>
                 </div>
