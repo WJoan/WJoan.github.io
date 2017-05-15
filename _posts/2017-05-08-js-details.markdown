@@ -47,13 +47,12 @@ JS内存垃圾自动回收的机制下，内存泄露产生的原因往往和不
 
 - 无意的全局变量
 下面代码就无意中声明了一个全局变量，会得到 window 的引用，bar 实际上是 window.bar，它的作用域在 window 上，所以 foo 函数执行结束后，bar 也不会被内存收回。
+
 ```
 function foo(arg) {
     bar = "";
 }
-
 foo();
-
 /** 另外一种无意的全局变量的情况是：**/
 
 function foo() {
@@ -64,6 +63,7 @@ function foo() {
 - DOM 片段
 每单击一次按钮，就创建一个`<div>`，它没有引用任何对象，但是回调结束之后，这个空的 `<div>` 是不会被回收的。
 在不使用DOM节点后将其引用手动覆为`null`。
+
 ```
 var btn = document.getElementById('btn');
 btn.onclick = function() {  var fragment = document.createElement('div');
@@ -73,6 +73,7 @@ btn.onclick = function() {  var fragment = document.createElement('div');
 - DOM的监听事件
 虽然 `<button>`从 DOM 中移除了，由于它的监听器还在，所以无法被 GC 回收。
 要避免这种情况就是通过 `removeEventListener` 将回调函数去掉。
+
 ```
 var content = document.getElementById('content');
 content.innerHTML = '<button id="button">click</button>';
@@ -85,6 +86,7 @@ content.innerHTML = '';
 - 被遗忘的计时器和回调函数
 下面的例子中，我们每隔一秒就将得到的数据放入到文档节点中去。但在 `setInterval` 没有结束前，回调函数里的变量以及回调函数本身都无法被回收。那什么才叫结束呢？就是调用了 `clearInterval`。如果回调函数内没有做什么事情，并且也没有被 clear 掉的话，就会造成内存泄漏。不仅如此，如果回调函数没有被回收，那么回调函数内依赖的变量也没法被回收。上面的例子中，`someResource` 就没法被回收。
 同样的，setTiemout 也会有同样的问题。所以，当不需要 interval 或者 timeout 时，最好调用 `clearInterval` 或者 `clearTimeout`。
+
 ```
 let someResource = getData();
 setInterval(() => {
@@ -138,6 +140,9 @@ JSONP的原理就是利用`<script>`标签没有跨域限制的“漏洞”来�
 （6）URIError是URI相关函数的参数不正确时抛出的错误，比如encodeUri
 
 ## JS的原型链与闭包
+
+未完待续...
+
 > **原文出处如下，本文内容有所更改** 
 作者： 圣经的旋律 
 链接：http://www.imooc.com/article/17009
