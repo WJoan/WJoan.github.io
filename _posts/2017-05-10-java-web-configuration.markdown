@@ -37,3 +37,15 @@ tags:		["web","java"]
 
 ### 启动 Tomcat 服务
 打开 Tomcat 安装目录，再打开 bin 文件夹，找到 `startup.bat` 双击运行（linux下面使用 startup.sh）。启动后在浏览器中打开 `http://localhost:8080` 可以看到一个 Tomcat自带的 JSP 页面说明启动成功。
+
+
+## 注意
+
+[在 Linux 下部署 web 项目]
+(http://www.cnblogs.com/xdp-gacl/p/4097608.html)
+
+[Mysql 使用指南](http://www.cnblogs.com/mr-wid/archive/2013/05/09/3068229.html#d11)
+
+[远程连接 Mysql](http://jingyan.baidu.com/album/363872ec3263236e4ba16f07.html?picindex=2)
+
+项目连接不同的数据库时，需要配置文件 spring-common.xml(Hibernate 的配置文件) 的数据源 url 信息以及用户名密码。url 中需要更改ip，本机数据库就使用 127.0.0.1，远程连接数据库就填写服务器ip。用户名和密码即为数据库登录的用户名和密码。
