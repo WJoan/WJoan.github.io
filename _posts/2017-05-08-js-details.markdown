@@ -138,6 +138,9 @@ JSONP的原理就是利用`<script>`标签没有跨域限制的“漏洞”来�
 （6）URIError是URI相关函数的参数不正确时抛出的错误，比如encodeUri
 
 ## JS的原型链与闭包
+
+未完待续...
+
 > **原文出处如下，本文内容有所更改** 
 作者： 圣经的旋律 
 链接：http://www.imooc.com/article/17009
