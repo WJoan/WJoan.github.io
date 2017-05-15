@@ -82,5 +82,5 @@ tags:		["css"]
   height: 400px;
 }
 ```
-继续 `flex` 大法好，设置 `flex-direction` 排列方向为垂直。
+使用 `flex` 布局，设置 `flex-direction` 排列方向为垂直。
 [参考链接](https://css-tricks.com/centering-css-complete-guide/)
