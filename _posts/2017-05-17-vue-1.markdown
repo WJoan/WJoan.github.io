@@ -12,26 +12,24 @@ tags:		["vue"]
 
 使用 nmp 的国内镜像 `cnmp` 安装，速度更快一些。
 
-> # 全局安装 vue-cli
-$ cnpm install -g vue-cli
+> $ cnpm install -g vue-cli
 
 ### 创建一个项目
 
-使用 cd 命令进入文件夹，执行下面的命令就会在该文件夹下生成项目。
+使用 cd 命令进入文件夹，执行下面的命令就会在该文件夹下创建一个基于 webpack 模板的新项目。
 
-> # 创建一个基于 webpack 模板的新项目
-$ vue init webpack my-project
+> $ vue init webpack my-project
 
 ### 安装项目依赖
 
-进入项目文件夹，安装依赖。然后启动项目。打开浏览器输入 http://localhost:8080/#/ 即为项目页面。
+进入项目文件夹，安装依赖。然后启动项目。打开浏览器输入 http://localhost:8080/#/ 即为项目页面。注意：这个项目默认启动 `8080端口`，由于 Tomcat 也占用该端口，如果启动了 Java web 或者 Tomcat 要先关闭这些项目，避免端口被占用。
 
 > $ cd my-project
 $ npm install
 $ npm run dev
 
 ![一个vue项目]({{ 
-site.baseurl }}/img/vue1-2.png)
+site.baseurl }}/img/vue1-2.PGN)
 
 
 ## Vue.js 的组件构成
@@ -59,3 +57,54 @@ var app = new Vue({
 ```
 
 上面是一个简单的例子。vue 通过设置 `el` 属性的值为 #app 绑定到了 html 中 id 为 app 的节点。而节点中 `{{}}` 里面的变量则与 vue 里的 message 属性是绑定的关系。当 vue 中的 message 发生变化的时候，html 页面中的变量也会跟着变化。这就是 vue 中的双向数据绑定的基本样例。
+
+## 重要的属性
+
+1. **data**
+
+```
+var vm = new Vue({
+  el: '#example',
+  data: {
+    message: 'Hello'
+  })
+```
+data 为一个对象，它的属性包含了需要绑定的数据，这些属性也会自动绑定到 vue 对象上。
+
+2. **methods**
+
+```
+// in component
+methods: {
+  reversedMessage: function () {
+    return this.message.split('').reverse().join('')
+  }
+}
+```
+
+包含了 vue 中的一些方法。
+
+3. **watch**
+
+```
+var vm = new Vue({
+  el: '#demo',
+  data: {
+    a: 1,
+    b: []
+  },
+  watch: {
+    'a': function (val, oldVal) {
+    		console.log(val, oldVal);
+		}
+  }
+})
+```
+ 可以指定监听某一个绑定对象，在其发生变化的时候执行某一函数，这个函数有两个参数，一个 `val` 当前值，另一个是 `oldVal` 变化前的值。
+
+ ## 模板指令
+
+1. 条件渲染 `v-if` `v-else` `v-show`
+2. 列表渲染 `v-for`
+3. 事件处理器 `v-on`
+4. 节点属性绑定 `v-bind`（常用于样式绑定）
