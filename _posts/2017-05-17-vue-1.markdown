@@ -60,6 +60,7 @@ var app = new Vue({
 
 ## 重要的属性
 
+
 **data**
 
 ```
@@ -83,6 +84,7 @@ methods: {
 ```
 
 包含了 vue 中的一些方法。
+
 
 **watch**
 
