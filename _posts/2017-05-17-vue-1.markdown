@@ -25,8 +25,8 @@ tags:		["vue"]
 进入项目文件夹，安装依赖。然后启动项目。打开浏览器输入 http://localhost:8080/#/ 即为项目页面。注意：这个项目默认启动 `8080端口`，由于 Tomcat 也占用该端口，如果启动了 Java web 或者 Tomcat 要先关闭这些项目，避免端口被占用。
 
 > $ cd my-project
-$ npm install
-$ npm run dev
+> $ npm install
+> $ npm run dev
 
 ![一个vue项目]({{ 
 site.baseurl }}/img/vue1-2.png)
@@ -60,6 +60,7 @@ var app = new Vue({
 
 ## 重要的属性
 
+
 **data**
 
 ```
@@ -83,6 +84,7 @@ methods: {
 ```
 
 包含了 vue 中的一些方法。
+
 
 **watch**
 
