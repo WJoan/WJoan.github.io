@@ -3,7 +3,7 @@ layout:     post
 title:      "CSS居中布局"
 date:       2017-05-13 15:16:45
 author:     "Joan"
-tags:		["css"]
+tags:		    ["css"]
 ---
 
 ## 水平居中

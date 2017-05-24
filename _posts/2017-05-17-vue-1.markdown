@@ -1,6 +1,7 @@
 ---
 layout:     post
 title:      "Vue.JS (一)"
+subtitle:   "环境的搭建与重要属性"
 date:       2017-05-17 19:52:34
 author:     "Joan"
 tags:		["vue"]
