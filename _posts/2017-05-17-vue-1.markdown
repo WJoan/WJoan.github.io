@@ -9,7 +9,7 @@ tags:		["vue"]
 
 ## 环境搭建
 
-### 安装 Vue.js 命令行工具 vue.cli
+### 安装 Vue.js 脚手架工具 vue.cli
 
 使用 nmp 的国内镜像 `cnmp` 安装，速度更快一些。
 

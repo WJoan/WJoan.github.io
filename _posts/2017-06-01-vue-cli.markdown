@@ -1,0 +1,64 @@
+---
+layout:     post
+title:      "Vue.JS (二)"
+subtitle:   "项目目录结构"
+date:       2017-06-01 09:24:23
+author:     "Joan"
+tags:		["vue"]
+---
+
+## 目录结构
+
+ .
+├── build/                      # webpack config files
+│   └── ...
+├── config/
+│   ├── index.js                # main project config
+│   └── ...
+├── src/
+│   ├── main.js                 # app entry file
+│   ├── App.vue                 # main app component
+│   ├── components/             # ui components
+│   │   └── ...
+│   └── assets/                 # module assets (processed by webpack)
+│       └── ...
+├── static/                     # pure static assets (directly copied)
+├── test/
+│   └── unit/                   # unit tests
+│   │   ├── specs/              # test spec files
+│   │   ├── index.js            # test build entry file
+│   │   └── karma.conf.js       # test runner config file
+│   └── e2e/                    # e2e tests
+│   │   ├── specs/              # test spec files
+│   │   ├── custom-assertions/  # custom assertions for e2e tests
+│   │   ├── runner.js           # test runner script
+│   │   └── nightwatch.conf.js  # test runner config file
+├── .babelrc                    # babel config
+├── .postcssrc.js               # postcss config
+├── .eslintrc.js                # eslint config
+├── .editorconfig               # editor config
+├── index.html                  # index.html template
+└── package.json                # build scripts and dependencies
+
+### webpack 配置
+
+build
+ ├── dev-server.js 网站配置
+ ├── webpack.dev.conf.js webpack依赖
+ └── webpack.base.conf.js webpack配置
+
+PS:编译好的文件会放在内存中
+
+[webpack](http://vuejs-templates.github.io/webpack/)
+
+[vue-loader](https://vue-loader.vuejs.org/zh-cn/)
+
+### vue-router 路由功能
+
+[vue-router](https://router.vuejs.org/zh-cn/)
+
+引用vue-router 
+
+```JavaScript
+import VueRouter from 'vue-router';
+```
