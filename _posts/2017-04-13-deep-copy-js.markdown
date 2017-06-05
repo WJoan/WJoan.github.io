@@ -17,7 +17,7 @@ tags:		["JS"]
 var oldArr = [1,2,3];
 var newArr = oldArr;            // 浅拷贝
 var newArr1 = oldArr.slice(0);  // 深拷贝
-var newArr2 = oldArr.contact(); // 深拷贝
+var newArr2 = oldArr.concat(); // 深拷贝
 ```
 数组的截取和连接操作，都是在不改变原有数组的情况下返回一个新的数组，因此实现了深拷贝。其本质因该是：新建一个空数组，然后对原数组进行`遍历`操作，然后一一赋值。
 

@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      "Vue.JS (二)"
-subtitle:   "项目目录结构"
+subtitle:   "项目目录结构与vue-router的使用"
 date:       2017-06-01 09:24:23
 author:     "Joan"
 tags:		["vue"]
@@ -50,15 +50,47 @@ build
 PS:编译好的文件会放在内存中
 
 [webpack](http://vuejs-templates.github.io/webpack/)
-
 [vue-loader](https://vue-loader.vuejs.org/zh-cn/)
 
 ### vue-router 路由功能
 
-[vue-router](https://router.vuejs.org/zh-cn/)
-
-引用vue-router 
-
-```JavaScript
-import VueRouter from 'vue-router';
+定义组件
 ```
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import App from './App';
+import goods from './components/goods/goods';
+import ratings from './components/ratings/ratings';
+import seller from './components/seller/seller';
+```
+
+使用vue-router 
+```
+Vue.use(VueRouter)
+```
+
+定义路由
+```
+const routes = [
+  {path: '/goods', component: goods},
+  {path: '/ratings', component: ratings},
+  {path: '/seller', component: seller}
+];
+```
+
+创建实例
+```
+const router = new VueRouter({routes});
+```
+
+挂载根实例
+```
+let App2 = Vue.extend(App);
+/* eslint-disable no-new */
+new App2({router}).$mount('#app');
+```
+
+[更多介绍>>](https://router.vuejs.org/zh-cn/)
+
+
+### vue-resource
