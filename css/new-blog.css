@@ -29,6 +29,7 @@
 }
 
 .tech img {
+	display: inline-block;
 	width: 108px;
 	height: 108px;
 }
