@@ -26,7 +26,7 @@ Git是目前最流行的版本管理系统。Git 和其他版本控制系统的�
 
 (PS: 远程操作后面详细说明)
 
-<img src="{{site.baseurl}}/img/git(1).jpg"></img>
+<img src="{{site.baseurl}}/img/git(1).jpg">
 
 图1 git操作流程
 
@@ -35,29 +35,29 @@ Git是目前最流行的版本管理系统。Git 和其他版本控制系统的�
 
 当使用 `git commit` 提交时，会创建一个提交对象，这个对象中包含了一个指向当前版本树的指针，还包含了一个指向上一个版本的指针。
 
-<img src="{{site.baseurl}}/img/git(2).png"></img>
+<img src="{{site.baseurl}}/img/git(2).png">
 
 图2 单次提交的数据结构
 
-<img src="{{site.baseurl}}/img/git(3).png"></img>
+<img src="{{site.baseurl}}/img/git(3).png">
 
 图3 多个提交对象之间的链接关系
 
 Git 中的`分支`，其实本质上仅仅是个指向 commit 对象的可变指针。Git 会使用 master 作为分支的默认名字。可以使用 `git branch` 命令创建不同的分支，也就是创建多个指针。
 
-<img src="{{site.baseurl}}/img/git(4).png"></img>
+<img src="{{site.baseurl}}/img/git(4).png">
 
 图4  多个分支指向提交数据的历史
 
 Git 是如何知道你当前在哪个分支上工作的呢？其实答案也很简单，它保存着一个名为 `HEAD` 的特别指针。它是一个指向你正在工作中的本地分支的指针，使用 `git checkout` 命令来切换分支，也就是改变 `HEAD` 指针的指向。
 
-<img src="{{site.baseurl}}/img/git(5).png"></img>
+<img src="{{site.baseurl}}/img/git(5).png">
 
 图5  HEAD 指向当前所在的分支
 
 我们可以在不同分支里反复切换，并进行不同的改变，然后在时机成熟时把它们合并到一起。跳转到 `master` 分支后，使用 `git branch --no-merged` 命令查看哪些分支还未合并。然后再使用 `git merge` 命令将当前分支与特定分支进行合并。
 
-<img src="{{site.baseurl}}/img/git(6).png"></img>
+<img src="{{site.baseurl}}/img/git(6).png">
 
 图6 需要合并的分支
 
@@ -91,7 +91,7 @@ no changes added to commit (use "git add" and/or "git commit -a")
 
 在解决了所有文件里的所有冲突后，运行 `git add` 将把它们标记为已解决状态（译注：实际上就是来一次快照保存到暂存区域。）再运行一次 `git status `来确认所有冲突都已解决。最后用 `git commit` 来完成这次合并提交。
 
-> 参考链接 ： 
-https://git-scm.com/book/zh/v1/%E8%B5%B7%E6%AD%A5
+参考链接 ： 
+> https://git-scm.com/book/zh/v1/%E8%B5%B7%E6%AD%A5
 http://www.ruanyifeng.com/blog/2014/06/git_remote.html
 
