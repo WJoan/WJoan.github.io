@@ -1,0 +1,89 @@
+---
+layout:     post
+title:      "搭建rtmp直播服务器"
+subtitle:   "ubuntu下nginx-rtmp-module的使用"
+date:       2017-06-15 16:38:26
+author:     "Joan"
+tags:		["web"]
+---
+
+
+## 搭建nginx rtmp直播服务器
+
+### 1. 从github下载nginx-rtmp-module
+
+```
+git clone https://github.com/arut/nginx-rtmp-module.git
+```
+
+如果没有安装git,直接在Github上下载并解压就可以了
+
+### 2. 下载nginx压缩包并解压
+
+```
+http://nginx.org/en/download.html
+```
+
+<img src="{{site.baseurl}}/img/nginx_rtmp_ffmpeg_2.png">
+
+### 3. 解压nginx-1.11.1.tar.gz并进入查看
+
+```
+tar -xvf nginx-1.11.1.tar.gz
+cd nginx-1.11.1
+```
+
+### 4. 配置nginx
+
+```
+./configure --prefix=/usr/local/nginx --add-module=/path/to/nginx-rtmp-module --with-http_ssl_module --with-debug
+```
+
+<img src="{{site.baseurl}}/img/nginx_rtmp_ffmpeg_4.png">
+
+--prefix 后面是nginx安装路径，可以不用改
+
+--add-module 后面是nginx-rtmp-module的路径，这个要自行修改
+
+如果安装失败，请检查系统是否有PCRE、OpenSSL、zlib 等library
+
+【注意】安装PCRE2是不行的 [PCRE 安装教程](http://chenzhou123520.iteye.com/blog/1817563)
+
+### 5. 编译
+
+```
+make
+make install
+```
+
+<img src="{{site.baseurl}}/img/nginx_rtmp_ffmpeg_7.png">
+<img src="{{site.baseurl}}/img/nginx_rtmp_ffmpeg_8.png">
+
+### 6. 修改nginx.conf
+
+```
+cd /usr/local/nginx/conf
+vim nginx.conf
+```
+
+这里根据需要对http的端口号进行修改。
+
+### 7. 启动nginx
+
+```
+cd /usr/local/nginx/sbin
+./nginx
+```
+
+### 8. 检查端口是否占用
+
+```
+netstat -ntlp
+```
+最后在浏览器输入地址，如localhost:8080，看是否能成功进入nginx的欢迎页面
+<img src="{{site.baseurl}}/img/nginx_rtmp_ffmpeg_13.png">
+
+
+参考链接
+
+> http://cxuef.github.io/linux/%E3%80%90%E7%BD%AE%E9%A1%B6%E3%80%91%E6%90%AD%E5%BB%BAnginx-rtmp%E7%9B%B4%E6%92%AD%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%8Cffmpeg%E6%A8%A1%E6%8B%9F%E6%8E%A8%E6%B5%81/
