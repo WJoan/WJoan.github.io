@@ -29,7 +29,8 @@
 }
 
 .tech img {
-	display: inline-block;
-	width: 108px;
-	height: 108px;
+    display: inline-block;
+    width: 90px;
+    height: 90px;
+    margin: 1em 0.2em;
 }
