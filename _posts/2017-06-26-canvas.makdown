@@ -38,7 +38,7 @@ tags:		["canvas"]
 
 
 
-然后在 js 中获取一些基本信息。代码的第一行通过使用 `document.getElementById()` 方法来为 `<canvas>` 元素得到 `DOM` 对象。一旦有了元素对象，你可以通过使用它的 `getContext()` 方法来访问绘画上下文。【注意】获得的是 `DOM` 对象，而不是 `Jquery` 对象。
+然后在 js 中获取一些基本信息。代码的第一行通过使用 `document.getElementById()` 方法来为 `canvas` 元素得到 `DOM` 对象。一旦有了元素对象，你可以通过使用它的 `getContext()` 方法来访问绘画上下文。【注意】获得的是 `DOM` 对象，而不是 `Jquery` 对象。
 
 ```
 const c= document.getElementById("myCanvas");
