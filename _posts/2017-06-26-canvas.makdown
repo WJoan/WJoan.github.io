@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "使用 Canvas 绘制雷达扫描效果"
+title:      "Canvas 绘制雷达扫描效果"
 date:       2017-06-15 16:38:26
 author:     "Joan"
 tags:		["canvas"]
@@ -36,11 +36,9 @@ tags:		["canvas"]
 
 首先需要一个指定高宽的画布：
 
-```
-<canvas id="myCanvas" width="300" height="300">您的浏览器暂不支持Canvas</canvas>  
-```
+`<canvas id="myCanvas" width="300" height="300">您的浏览器暂不支持Canvas</canvas>`
 
-然后在 js 中获取一些基本信息：
+然后在 js 中获取一些基本信息。代码的第一行通过使用 `document.getElementById()` 方法来为 `<canvas>` 元素得到 `DOM` 对象。一旦有了元素对象，你可以通过使用它的 `getContext()` 方法来访问绘画上下文。【注意】获得的是 `DOM` 对象，而不是 `Jquery` 对象。
 
 ```
 const c= document.getElementById("myCanvas");
@@ -327,9 +325,7 @@ Canvas 有两种大小，一种是元素本身，另外一种是元素绘图区�
 
 推荐写法1: 直接在 HTML 中声明高宽
 
-```
-<canvas id="tutorial" width="500" height="500"></canvas>
-```
+`<canvas id="tutorial" width="500" height="500"></canvas>`
 
 推荐写法2: 在脚本中使用 DOM 属性更改高宽
 
@@ -354,9 +350,7 @@ canvas.width = 500;
 
 参考链接：
 
-[MDN Canvas 教程](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_usage
-)
-
+[MDN Canvas 教程](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_usage)
 [Canvas Deep Dive](https://joshondesign.com/p/books/canvasdeepdive/toc.html)
 
 
