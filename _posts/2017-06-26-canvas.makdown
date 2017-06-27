@@ -1,10 +1,12 @@
 ---
 layout:     post
-title:      "使用 canvas 绘制雷达扫描效果"
+title:      "使用 Canvas 绘制雷达扫描效果"
 date:       2017-06-15 16:38:26
 author:     "Joan"
 tags:		["canvas"]
 ---
+
+## HTML5 Canvas
 
 由于项目需要，最近开始学习 `canvas`。第一个任务是绘制一个雷达扫描的效果，在此整理一下思路和 `canvas` 的一些知识点。
 
@@ -351,8 +353,11 @@ canvas.width = 500;
 <img src="{{site.baseurl}}/img/canvas/error.png">
 
 参考链接：
-https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_usage
-https://joshondesign.com/p/books/canvasdeepdive/toc.html
+
+[MDN Canvas 教程](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_usage
+)
+
+[Canvas Deep Dive](https://joshondesign.com/p/books/canvasdeepdive/toc.html)
 
 
 
