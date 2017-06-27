@@ -1,3 +1,4 @@
+---
 layout:     post
 title:      "使用 canvas 绘制雷达扫描效果"
 date:       2017-06-15 16:38:26
@@ -310,6 +311,48 @@ if(radar)	radar.scan();
 
 [最终效果](https://wjoan.github.io/exercise/html5_canvas/radar.html)
 
+【补充一个坑】
+
+## 关于 Canvas 的宽高
+
+> This is because a canvas actually has two sizes: the size of the element itself and the size of the element’s drawing surface.
+
+Canvas 有两种大小，一种是元素本身，另外一种是元素绘图区。绘图区默认宽度为 `300px` 高度为 `150px`。
+
+> When you set the element’s width and height attributes, you set both the element’s size and the size of the element’s drawing surface; however, when you use CSS to size a canvas element, you set only the element’s size and not the drawing surface. When the canvas element’s size does not match the size of its drawing surface, the browser scales the drawing surface to fit the element.
+
+使用 CSS 设置元素高宽的时候，绘图区的大小不改变。因此这样做会导致两种元素本身和绘图区大小不一致。这个时候浏览器就会对绘图区进行拉伸以适应元素本身大小。但是！在使用像 `moveTo(0,0)` 这样的函数时，坐标参数是以绘图区为准的。因此不推荐使用 CSS 来设置 `Canvas` 的大小。
+
+推荐写法1: 直接在 HTML 中声明高宽
+
+```
+<canvas id="tutorial" width="500" height="500"></canvas>
+```
+
+推荐写法2: 在脚本中使用 DOM 属性更改高宽
+
+```
+var canvas = document.getElementById('tutorial'); 
+canvas.width = 500; 
+canvas.width = 500; 
+```
+
+不推荐：使用 CSS 设置高宽
+
+```
+#tutorial {
+    width:500px; 
+    height:50px; 
+}
+```
+
+否则：
+
+<img src="{{site.baseurl}}/img/canvas/error.png">
+
 参考链接：
+https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Basic_usage
 https://joshondesign.com/p/books/canvasdeepdive/toc.html
+
+
 
