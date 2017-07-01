@@ -10,23 +10,33 @@ tags:		["canvas"]
 
 由于项目需要，最近开始学习 `canvas`。第一个任务是绘制一个雷达扫描的效果，在此整理一下思路和 `canvas` 的一些知识点。
 
+【什么是 Canvas】
+
+`canvas` 是 `HTML5` 中新增一个标签，它可以使用脚本来绘制 `2D` 或者 `3D` 图形。而 `SVG` 和 `VML` 使用一个 `XML` 文档来描述绘图。`SVG` 绘图很容易编辑与生成，但功能明显要弱一些。`
+
+`canvas` 可以完成动画、游戏、图表、图像处理等原来需要 `Flash` 完成的一些功能。
+
+【雷达扫描如何实现】
+
+效果图：
+
 <img src="{{site.baseurl}}/img/canvas/trans.png">
 
 思路：
 
 1 绘制雷达背景
 
-> 通过 canvas 矩形和路径方法绘制背景、圆形以及直线
+**通过 canvas 矩形和路径方法绘制背景、圆形以及直线**
 
 2 绘制扫描尾迹以及亮点儿
 
-> 绘制多个连续的弧形，透明度渐进达到尾迹的效果；绘制过个圆环，通过透明度渐进达到发亮的效果
+**绘制多个连续的弧形，透明度渐进达到尾迹的效果；绘制过个圆环，通过透明度渐进达到发亮的效果**
 
 3 添加动画效果
 
-> 使用 requestAnimationFrame 或者 setTimeOut 逐帧绘制
+**使用 requestAnimationFrame 或者 setTimeOut 逐帧绘制**
 
-## 绘制雷达背景
+## 一、绘制雷达背景
 
 雷达图的背景包括了几个基本元素：矩形、圆形、实线、虚线。
 
@@ -134,7 +144,7 @@ for(let i = 1; i<=15;){
 
 <img src="{{site.baseurl}}/img/canvas/dottedLine.png">
 
-## 绘制扫描尾迹及亮点
+## 二、绘制扫描尾迹及亮点
 
 扫描的尾迹效果通过多个透明度渐进的扇形区域组成。
 
@@ -219,7 +229,7 @@ let drawPoint = function (x,y,n) {
 
 <img src="{{site.baseurl}}/img/canvas/point.png">
 
-## 动画效果
+## 三、动画效果
 
 `requestAnimationFrame`是浏览器用于定时循环操作的一个接口，类似于 `setTimeout`，主要用途是按帧对网页进行重绘。`requestAnimationFrame` 的优势，在于充分利用显示器的刷新机制，比较节省系统资源。显示器有固定的刷新频率（60Hz或75Hz），也就是说，每秒最多只能重绘60次或75次，requestAnimationFrame的基本思想就是与这个刷新频率保持同步，利用这个刷新频率进行页面重绘。此外，使用这个API，一旦页面不处于浏览器的当前标签，就会自动停止刷新。这就节省了CPU、GPU和电力。
 
@@ -291,7 +301,7 @@ scan () {
 },
 ```
 
-## 最后
+## 四、最后
 
 将函数和变量整理到一个函数中
 
@@ -315,7 +325,7 @@ if(radar)	radar.scan();
 
 【补充一个坑】
 
-## 关于 Canvas 的宽高
+## 五、关于 Canvas 的宽高
 
 > This is because a canvas actually has two sizes: the size of the element itself and the size of the element’s drawing surface.
 
@@ -351,6 +361,35 @@ canvas.width = 500;
 否则：
 
 <img src="{{site.baseurl}}/img/canvas/error.png">
+
+## Canvas 与 SVG
+
+### 【SVG】
+
+`SVG` 是一种使用 `XML` 描述 `2D` 图形的语言。
+
+`SVG` 基于 `XML`，这意味着 `SVG DOM` 中的每个元素都是可用的。您可以为某个元素附加 `JavaScript` 事件处理器。
+
+在 `SVG` 中，每个被绘制的图形均被视为对象。如果 `SVG` 对象的属性发生变化，那么浏览器能够自动重现图形。
+
+### 【Canvas】
+
+`Canvas` 通过 `JavaScript` 来绘制 `2D` 图形。
+
+`Canvas` 是逐像素进行渲染的。
+
+在 `canvas` 中，一旦图形被绘制完成，它就不会继续得到浏览器的关注。如果其位置发生变化，那么整个场景也需要重新绘制，包括任何或许已被图形覆盖的对象。
+
+对比
+|Canvas|SVG|
+|------|---|
+|依赖分辨率|不依赖分辨率|
+|不支持事件处理器|支持事件处理器|
+|弱的文本渲染能力|最适合带有大型渲染区域的应用程序（比如谷歌地图）|
+|能够以 .png 或 .jpg 格式保存结果图像|复杂度高会减慢渲染速度（任何过度使用 DOM 的应用都不快）|
+|最适合图像密集型的游戏，其中的许多对象会被频繁重绘|不适合游戏应用|
+
+[SVG 与 Canvas：如何选择](https://msdn.microsoft.com/library/gg193983(v=vs.85).aspx)
 
 参考链接：
 
