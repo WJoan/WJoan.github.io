@@ -6,6 +6,10 @@ author:     "Joan"
 tags:		["canvas"]
 ---
 
+[最终效果](https://wjoan.github.io/exercise/html5_canvas/radar.html)
+
+[详细代码](https://github.com/WJoan/exercise/tree/gh-pages/html5_canvas)
+
 ## HTML5 Canvas
 
 由于项目需要，最近开始学习 `canvas`。第一个任务是绘制一个雷达扫描的效果，在此整理一下思路和 `canvas` 的一些知识点。
@@ -321,9 +325,8 @@ let radar = myCanvas("myCanvas");
 if(radar)	radar.scan();
 ```
 
-[最终效果](https://wjoan.github.io/exercise/html5_canvas/radar.html)
 
-【补充一个坑】
+【补充】
 
 ## 五、关于 Canvas 的宽高
 
