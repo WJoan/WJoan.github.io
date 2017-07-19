@@ -102,3 +102,25 @@ retina屏幕下的问题，根本原因：1px使用2dp渲染
 
 ## 终端交互优化
 
+移动web页面上的click事件响应都要慢上300ms（确认用户是单击还是双击）。
+
+### Tab事件
+
+使用`Tab`事件代替`click`事件
+
+> 在 touchstart、touchend时记录事件、手指位置，在 touchend 时进行比较，如果手指位置为同一位置（或允许移动一个非常小的位移）且时间间隔较短（一般认为是200ms），且过程中未曾触发过 touchmove，即可认为触发了手持设备上的“click”，一般称它为“tap”。
+
+### Touch 基础事件
+
+**触摸**才是移动设备的交互的核心事件
+
+- `touchstart` 手指触摸屏幕触发（已经有手指放屏幕上不会触发）
+- `touchmove` 手指在屏幕滑动，连续触发
+- `touchend` 手指离开屏幕时触发
+- `touchcancel` 系统取消touch时候触发（不常用）
+
+触摸事件包含专有的**触摸属性**
+
+- `touches` 跟踪触摸操作的touch对象数组
+- `targetTouches` 特定事件目标的touch对象数组
+- `changeTouches` 上次触发改变的touch对象数组
