@@ -27,10 +27,10 @@ tags:       ["webapp"]
 通俗的讲，移动设备上的`viewport`就是设备的屏幕上能用来**显示我们的网页的那一块区域**，在具体一点，就是浏览器上(也可能是一个app中的`webview`)用来显示网页的那部分区域，但`viewport`又不局限于浏览器可视区域的大小，它可能比浏览器的可视区域要大，也可能比浏览器的可视区域要小。在默认情况下，一般来讲，**移动设备上的viewport都是要大于浏览器可视区域的**，这是因为考虑到移动设备的分辨率相对于桌面电脑来说都比较小，所以为了能在移动设备上正常显示那些传统的为桌面浏览器设计的网站，移动设备上的浏览器都会把自己默认的viewport设为980px或1024px（也可能是其它值，这个是由设备自己决定的），但带来的后果就是浏览器**会出现横向滚动条**，因为浏览器可视区域的宽度是比这个默认的viewport的宽度要小的。
 
 
-【布局viewport】浏览器默认的viewport：document.body.clientWidth 
+`layout viewport`浏览器默认的viewport：document.body.clientWidth 
 <img src="{{site.baseurl}}/img/webapp/layout_viewport.png">
 
-【度量viewport】浏览器可视区域的大小：window.innerWidth
+`visual_viewport`浏览器可视区域的大小：window.innerWidth
 <img src="{{site.baseurl}}/img/webapp/visual_viewport.png">
 
 ### Meta标签
@@ -57,6 +57,48 @@ tags:       ["webapp"]
 ```
 
 ## 移动web布局
+
+### Flex 布局
+
+### 响应式布局
+
+媒体查询`@media`
+
+<img src="{{site.baseurl}}/img/webapp/2.png">
+
+百分比布局
+<img src="{{site.baseurl}}/img/webapp/3.png">
+
+弹性图片
+<img src="{{site.baseurl}}/img/webapp/4.png">
+
+重新布局
+<img src="{{site.baseurl}}/img/webapp/5.png">
+
+响应式设计的问题在于样式冗余，当一个设备访问一个响应式页面的时候，就会下载PC、ipad、手机等不同设备对应的样式。因此性能不会是最佳的，但是能够减少重复的开发。
+
+### 特别样式处理
+
+retina屏幕下的问题，根本原因：1px使用2dp渲染
+
+- 高清图片
+- 一像素边框
+
+方案1：
+```
+-webkit-transform: scaleY(0.5);
+```
+
+方案2：
+
+相对单位
+- `em`: 根据**父节点**的font-size为相对单位
+- `rem`: 根据**html**的font-size为相对单位
+
+<img src="{{site.baseurl}}/img/webapp/6.png">
+
+多行文本溢出
+<img src="{{site.baseurl}}/img/webapp/7.png">
 
 ## 终端交互优化
 
