@@ -1,0 +1,80 @@
+---
+layout:     post
+title:      "jQuery源码阅读"
+date:       2017-09-19 09:29:32
+author:     "Joan"
+tags:       ["jQuery"]
+---
+
+## 1、整体结构
+```
+(function () {
+     // 定义 jQuery
+     jQuery = function( selector, context ) {
+          return new jQuery.fn.init( selector, context );
+     }
+     // 给 jQuery 添加了一些方法和属性
+     jQuery.fn = jQuery.prototype = {......}
+     // jQuery 的继承方法
+     jQuery.extend = jQuery.fn.extend = function(){......}
+     // 扩展静态方法 如：$.ajax()、$.trim()
+     jQuery.extend({.......})
+     // 挂载到全局
+     window.jQuery = window.$ = jQuery;
+})();
+```
+## 2、JQuery构造与链式调用
+```
+// 算是一个工厂吧
+jQuery = function( selector, context ) {
+     return new jQuery.fn.init( selector, context );
+}
+jQuery.fn = jQuery.prototype = {
+     // 修正构造函数的指向（对象把原有原型覆盖了）
+     constructor: jQuery,
+     // 一些实例方法
+     ......
+}
+// 真正的构造函数
+//  selector：选择器
+//  context：上下文
+init = jQuery.fn.init = function( selector, context, root ) {
+     // 异常处理
+     if ( !selector ) {
+         return this;
+     }
+     // 正常返回的this是一个数组对象
+    this.length = 0;
+    context = context || document;
+     ......
+     return this;
+}
+init.prototype = jQuery.fn;
+```
+
+<img src="{{site.baseurl}}/img/jQuery1.jpg">
+
+- **注意**：jQuery会返回一个数组对象，包括了通过选择器查找到的DOM对象，该对象的__proto__指向jQuery的原型。因此使用$("......")的时候，不能直接使用DOM的操作方法，因为这个对象不是一个DOM对象，可以这么做`$("#id")[0]`
+
+## 3、扩展对象
+jQuery.extend = jQuery.fn.extend = function(){......}
+关键代码为：
+```
+for ( name in options ) {
+    src = target[ name ];
+    copy = options[ name ];
+     if ( target === copy){
+          continue;
+     }
+     if ( deep ) {
+        clone = src;
+        target[ name ] = jQuery.extend( deep, clone, copy );
+    } else {
+        target[ name ] = copy;
+    }
+}
+```
+
+- **避免循环引用**：在拷贝对象的属性时，会判断当前对象（this或者被扩展对象）是否和属性相等，如果相等就跳过这个对象不做处理。
+
+- **递归深拷贝**：jQuery的extend方法使用基本的递归思路实现了深度复制，但是这个方法也无法处理source对象内部循环引用的问题，同时对于Date、Function等类型的值也没有实现真正的深度复制，但是这些类型的值在重新定义时一般都是直接覆盖，所以也不会对源对象造成影响，因此一定程度上也符合深复制的条件
