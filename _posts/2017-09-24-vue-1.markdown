@@ -1,0 +1,270 @@
+---
+layout:     post
+title:      "Vue.JS (一)"
+subtitle:   "环境的搭建与重要属性"
+date:       2017-09-24 11:17:23
+author:     "Joan"
+tags:		["vue"]
+---
+
+## 环境搭建
+
+### 安装 Vue.js 命令行工具 vue.cli
+
+使用 nmp 的国内镜像 `cnmp` 安装，速度更快一些。
+
+> $ cnpm install -g vue-cli
+
+### 创建一个项目
+
+使用 cd 命令进入文件夹，执行下面的命令就会在该文件夹下创建一个基于 webpack 模板的新项目。
+
+> $ vue init webpack my-project
+
+### 安装项目依赖
+
+进入项目文件夹，安装依赖。然后启动项目。打开浏览器输入 http://localhost:8080/#/ 即为项目页面。注意：这个项目默认启动 `8080端口`，由于 Tomcat 也占用该端口，如果启动了 Java web 或者 Tomcat 要先关闭这些项目，避免端口被占用。
+
+> $ cd my-project
+> $ npm install
+> $ npm run dev
+
+![一个vue项目]({{ 
+site.baseurl }}/img/vue1-2.png)
+
+
+## Vue.js 的组件构成
+
+`.vue` 文件代表了 vue 的组件，是由常见的 `.html` `.css` `.js` 三种文件构成的。其实从 .vue 到另外三种文件的过程使用 `webpack` 完成的。
+
+![Vue.js的组件构成]({{ 
+site.baseurl }}/img/vue1-3.jpg)
+
+## 双向数据绑定
+
+```
+<div id="app">
+  {{ message }}
+</div>
+```
+
+```
+var app = new Vue({
+  el: '#app',
+  data: {
+    message: 'Hello Vue!'
+  }
+})
+```
+
+上面是一个简单的例子。vue 通过设置 `el` 属性的值为 #app 绑定到了 html 中 id 为 app 的节点。而节点中 `{{}}` 里面的变量则与 vue 里的 message 属性是绑定的关系。当 vue 中的 message 发生变化的时候，html 页面中的变量也会跟着变化。这就是 vue 中的双向数据绑定的基本样例。
+
+## 重要的属性
+
+### 模板语法
+
+```
+<span>Message: {{ msg }}</span>
+```
+
+### 基本指令
+
+```
+<div v-bind:class="{ active: isActive }"></div>
+```
+
+`v-bind` 指令可以用于响应式地更新 **HTML 属性**，比如上述代码可以根据`isActive `的布尔值更新class属性。
+
+```
+<a v-on:click="doSomething">
+```
+
+`v-on` 指令，它用于监听 **DOM 事件**
+
+```
+<input v-model="message" placeholder="edit me">
+<p>Message is: {{ message }}</p>
+```
+
+` v-model `指令在表单控件元素上创建双向数据绑定。它会根据控件类型自动选取正确的方法来更新元素。尽管有些神奇，但 `v-model` 本质上不过是语法糖，它负责监听用户的输入事件以更新数据，并特别处理一些极端的例子。
+
+### 计算属性
+
+```
+computed: {
+    f1 : function (){ ... },
+    f2 : function (){ ... },
+    ......
+}
+```
+
+可以像绑定普通属性一样在模板中绑定计算属性；
+计算属性只有在它的**相关依赖发生改变时**才会重新求值。
+
+### 方法
+
+```
+methods: {
+  method1 : function () { ... },
+  method2 : function () { ... },
+}
+```
+
+每当触发重新渲染时，方法的调用方式将总是再次执行函数。
+
+### watch属性
+
+```
+watch: {
+  属性1 : function(newVal, oldVal) { ... },
+  属性2 : function(newVal, oldVal) { ... },
+}
+```
+
+当你想要在数据变化响应时，执行**异步操作**或开销较大的操作，这是很有用的。
+
+### 条件渲染 v-if
+
+```
+<div v-if="Math.random() > 0.5">
+  Now you see me
+</div>
+<div v-else>
+  Now you don't
+</div>
+``` 
+
+`v-if `是“真正的”**条件渲染**，因为它会确保在切换过程中条件块内的事件监听器和子组件适当地被销毁和重建。
+`v-show` 就简单得多——不管初始条件是什么，元素总是会被渲染，并且只是简单地基于 CSS 进行切换。
+
+### 列表渲染 v-for
+循环遍历一个数组：
+
+```
+<ul id="example-2">
+  <li v-for="(item, index) in items">
+    {{ parentMessage }} - {{ index }} - {{ item.message }}
+  </li>
+</ul>
+```
+
+循环遍历一个对象：
+
+```
+<div v-for="(value, key) in object">
+  {{ key }}: {{ value }}
+</div>
+```
+
+### 数组与对象的更新方法
+
+可以触发视图更新的数组方法：
+
+- push()
+- pop()
+- shift()
+- unshift()
+- splice()
+- sort()
+- reverse()
+
+按照索引更新数组：
+
+```
+Vue.set(example1.items, indexOfItem, newValue)
+```
+
+**Vue 不能检测对象属性的添加或删除**。因此使用如下方法更新对象：
+
+```
+Vue.set(object, key, value)
+```
+
+### 组件
+
+在较高层面上，组件是自定义元素，Vue.js 的编译器为它添加特殊功能。在有些情况下，组件也可以是原生 HTML 元素的形式，以 `is` 特性扩展。
+
+要注册一个全局组件，你可以使用 `Vue.component(tagName, options)`。例如：
+
+```
+// 注册
+Vue.component('my-component', {
+  template: '<div>A custom component!</div>'
+})
+// 创建根实例
+new Vue({
+  el: '#example'
+})
+```
+
+组件在注册之后，便可以在父实例的模块中以自定义元素 `<my-component></my-component>` 的形式使用。**要确保在初始化根实例之前注册了组件**：
+
+```
+<div id="example">
+  <my-component></my-component>
+</div>
+```
+
+通过 Vue 构造器传入的各种选项大多数都可以在组件里用。在组件中 `data` 必须是一个函数。
+
+** 父子组件的通信 **
+
+在 Vue 中，父子组件的关系可以总结为 **props down, events up**。父组件通过 `props` 向下传递数据给子组件，子组件通过 `events` 给父组件发送消息。看看它们是怎么工作的。
+
+子组件
+
+```
+Vue.component('child', {
+  // camelCase in JavaScript
+  props: ['myMessage'],
+  template: '<span>{{ myMessage }}</span>'
+})
+```
+
+父组件（**注意HTML中不区分大小写，驼峰格式要转成a-b的模式**）
+
+```
+<div>
+  <input v-model="parentMsg">
+  <br>
+  <child v-bind:my-message="parentMsg"></child>
+</div>
+```
+
+父组件可以在使用子组件的地方直接用 `v-on` 来监听子组件通过 `this.$emit` 触发的事件。
+
+```
+<div id="counter-event-example">
+  <p>{{ total }}</p>
+  <button-counter v-on:increment="incrementTotal"></button-counter>
+  <button-counter v-on:increment="incrementTotal"></button-counter>
+</div>
+```
+
+```
+Vue.component('button-counter', {
+  template: '<button v-on:click="incrementCounter">{{ counter }}</button>',
+  data: function () {
+    return {
+      counter: 0
+    }
+  },
+  methods: {
+    incrementCounter: function () {
+      this.counter += 1
+      this.$emit('increment')
+    }
+  },
+})
+new Vue({
+  el: '#counter-event-example',
+  data: {
+    total: 0
+  },
+  methods: {
+    incrementTotal: function () {
+      this.total += 1
+    }
+  }
+})
+```
