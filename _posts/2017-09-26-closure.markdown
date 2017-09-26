@@ -1,0 +1,184 @@
+---
+layout:     post
+title:      "JavaScript中的闭包"
+subtitle:   "内存泄漏与调试方法"
+date:       2017-09-26 16:35:14
+author:     "Joan"
+tags:       ["closure"]
+---
+
+## 函数的作用域链
+
+### 1. 作用域
+
+ES6 之前 JS 里面是没有块级作用域（`scope`）的，JS 的主要作用域是**函数作用域**。那么作用域到底是什么呢，下面是**Wiki**中的一段描述：
+
+> **静态作用域**又叫做词法作用域，采用词法作用域的变量叫**词法变量**。词法变量有一个在编译时静态确定的作用域。词法变量的作用域可以是一个函数或一段代码，该变量在这段代码区域内**可见**；在这段区域以外该变量**不可见（或无法访问）**。词法作用域里，取变量的值时，会检查**函数定义时**的文本环境，捕捉函数定义时对该变量的绑定。大多数现在程序设计语言都是采用静态作用域规则，如C/C++、C#、Python、Java、**JavaScript**……
+> https://zh.wikipedia.org/wiki/%E4%BD%9C%E7%94%A8%E5%9F%9F
+
+总之**作用域**就是规定了一个**变量或者函数**，它的访问范围，而这个范围是在**函数定义的时候**就决定了的。
+
+## 2. 变量对象
+
+环境中定义的所有变量和函数都保存在这个对象中，我们把`变量对象`（**variable object**）简写为**VO**，看下面这个例子：
+
+```
+var a = 10;
+function test(x) {
+  var b = 20;
+};
+test(30);
+
+```
+
+此时的变量对象为：
+
+```
+// 全局上下文的变量对象
+VO(globalContext) = {
+  a: 10,
+  test: <reference to function>
+};
+// test函数上下文的变量对象
+VO(test functionContext) = {
+  x: 30,
+  b: 20
+};
+```
+
+### 3. 作用域链
+
+`作用域链`本质上是一个指向**变量对象**的指针列表，它只引用但是不实际包含变量对象。在**函数创建**的时候，会创建一个预先包含**全局变量对象**的作用域链，这个`作用域链`被保存在内部的`[[Scope]]`中。通过`作用域链`就可以访问到在一个函数访问范围内的所有变量了。
+
+![scope chain](http://upload-images.jianshu.io/upload_images/4297212-c119522dfe5abe81.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+### 4. 活动对象
+
+那么`活动对象`又是什么呢？
+
+在函数**调用**的时候，会创建一个执行环境，通过复制`[[Scope]]`中的对象构建起执行环境的作用域链。然后就会有一个`活动对象`被创建，并被推入到执行环境作用域链的前端。
+
+让我们看一个例子：
+
+```
+function test(a, b) {
+  var c = 10;
+  function d() {}
+  var e = function _e() {};
+  (function x() {});
+}
+test(10); // call
+```
+
+当进入带有参数 10 的 test 函数上下文时，AO 表现为如下：
+
+```
+AO(test) = {
+  a: 10,
+  b: undefined,
+  c: undefined,
+  d: <reference to FunctionDeclaration "d">
+  e: undefined
+};
+```
+
+**注意**，`AO` 里并不包含函数“x”。这是因为“x” 是一个函数表达式(FunctionExpression, 缩写为 FE) 而不是函数声明，函数表达式不会影响 VO。 不管怎样，函数“_e” 同样也是函数表达式，但是就像我们下面将看到的那样，因为它分配给了变量 “e”，所以它可以通过名称“e”来访问。 
+
+这个时候，`AO`中的变量还都是默认的初始值，随着代码一步步执行，`AO`中变量的值会随之变化。
+
+## 什么是闭包
+
+在《JavaScript高级程序设计》中，对闭包的定义是这样的：
+
+> 闭包是指有权访问另一个函数作用域中的变量的函数。创建闭包的常见方式，就是在一个函数内部创建另一个函数。
+
+![closure](http://upload-images.jianshu.io/upload_images/5569096-3dae06faf9dc29d2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+站在`作用域链`的角度来看，在一个函数内部定义另一个函数，内部函数会把外部函数的`活动对象`添加到它的作用域链中。**注意**，这里`闭包`所添加的是外部函数的`活动对象`，而这个`活动对象`是每次函数被调用的时候都会重新创建的（上面提到过）。外部函数执行完毕后，活动对象应该会被销毁，但是由于`闭包`（**比如匿名函数**）`作用域链`的引用，它就不会被销毁，直到`闭包`被销毁。
+
+## 在Chrome中观察闭包
+
+这段代码涉及到了4个函数，第一个`fnGlobal `是一个全局的函数，而`fnClosure1 `是`fnGlobal `中的一个闭包、`fnClosure2 `是`fnClosure1 `中的一个闭包，`fnClosure3`也是`fnGlobal `中的一个闭包，并且它通过函数返回到全局，并被全局变量引用着。下面，我们分别在不同的位置打断点来观察：
+
+```
+function fnGlobal () {
+  var m = 100;
+
+  function fnClosure1 () {
+    console.log(m);
+    
+    var a = 88;
+
+    function fnClosure2 () {
+      console.log(a+m);
+      debugger;
+    };
+
+    fnClosure2();
+    debugger;
+  };
+
+  fnClosure1();
+  
+  return function fnClosure3(){
+    console.log(123);
+    debugger;
+  }
+}
+
+var f = fnGlobal( );
+```
+在`fnClosure2 `中，用到了 `fnGlobal( )` 的变量`m`，以及`fnClosure1 `中的`a`，因此它的`作用域链`保留了两个其他函数活动变量：
+
+![jcspp 8t 7x s ht41mhai](https://user-images.githubusercontent.com/13451020/30860159-c56e6e4c-a2f8-11e7-9cf7-aeeb66f27d8d.png)
+
+在`fnClosure1`中，只用到了 `fnGlobal( )` 的变量`m`，因此它的`作用域链`只保留了一个其他函数活动变量：
+
+![bniacfz2z 0 c poo6 81 s](https://user-images.githubusercontent.com/13451020/30860278-36217d28-a2f9-11e7-978d-00c9fbb1eddc.png)
+
+最后我们通过`f`，执行`fnClosure3`。我们可以看到`fnClosure3`中并没有用到任何外部函数的变量，但是它依然保留了 `fnGlobal( )`的`活动变量`。这个是由于`fnClosure1`、`fnClosure3`都是`fnGlobal( )`的闭包，在函数定义的时候，它们的`作用域链`是共享的，其中一个闭包保留了外部的变量，那么也会影响到其他的闭包。**这一点非常重要**，也很容易被忽略。这个时候，由于`fnClosure3`在全局变量中，那么它作用域链上的对象就不会释放，即`m`会一直在内存中，直到关闭页面。
+
+![822zdd qzahv2v x 6x e_e](https://user-images.githubusercontent.com/13451020/30860449-b094e0b8-a2f9-11e7-8037-cf8fb5081c48.png)
+
+
+## 闭包有什么用
+
+
+
+## 究竟闭包会不会导致内存泄漏
+
+`闭包`确实会使得某些变量无法释放，但是它不会直接导致内存泄漏。但是当我们不注意的时候，确实会出现内存泄漏的情况。在项目过程中，我就遇到了非常奇怪的内存泄漏的问题，当时使用了WebSocket。不过可以通过下面的代码简单模拟一下：
+
+```
+  var theThing = null;
+  var replaceThing = function () {
+    var originalThing = theThing;
+    var unused = function () {
+      if (originalThing)
+        console.log("hi");
+      };
+      theThing = {
+        longStr: new Array(1000000).join('*'),
+        someMethod: function () {
+          console.log(someMessage);
+        }
+      };
+    };
+  // 尝试执行这个函数多次，会发现出现了内存泄漏的问题。
+  replaceThing( );
+  replaceThing( );
+  replaceThing( );
+  replaceThing( );
+```
+
+执行三次：
+
+![leak](https://user-images.githubusercontent.com/13451020/30861248-bb3e3ade-a2fc-11e7-821d-30c843bb97d5.png)
+
+执行四次：
+
+![leak2](https://user-images.githubusercontent.com/13451020/30861402-2f672920-a2fd-11e7-9d74-69487f735ed2.png)
+
+## 参考
+
+> http://dmitrysoshnikov.com/ecmascript/chapter-2-variable-object/
