@@ -1,0 +1,369 @@
+---
+layout:     post
+title:      "jQuery源码阅读"
+date:       2017-10-11 19:43:54
+author:     "Joan"
+tags:       ["JS"]
+---
+
+# ES2015
+
+## ECMAScript
+
+ECMAScript 是欧洲计算机制造商协会以 JavaScript 为基础制定的一种脚本语言标准。我们常见的 Web 浏览器或 JavaScript 运行环境（如 V8 引擎）只是根据 ECMAScript 规范实现了一套 JavaScript 运行引擎，使其作为宿主并让 JavaScript 可以作为脚本语言运行。
+
+### 版本发展
+
+| 标准                     | 发布时间     |
+| ---------------------- | -------- |
+| ECMA-262               | 1997年7月  |
+| ECMA-262 Edition2      | 1998年8月  |
+| ECMA-262 Edition3      | 1999年12月 |
+| ECMA-262 Edition5      | 2009年12月 |
+| ECMA-262 2015 Edition6 | 2015年6月  |
+| ECMA-262 2016 Edition7 | 2016年7月  |
+
+
+
+## ES2015
+
+ES2015 是 ECMA-262 的第六个版本。这个版本新增了很多语法糖，比如箭头函数、class、模板字符串等等。这些新特性初衷是方便开发者使用，增加了代码可读性、减少了程序代码的出错率。
+
+除此之外，ES2015 中原生的模块化标准提高了 JS 的模块化能力。在程序代码模块化解耦之后，组件化开发便能进一步推进项目程序的工程化进度。
+
+
+
+## let、const 和块级作用域
+
+**作用域** 规定了一个变量或者函数能够被访问的范围。ES6 引入了`let`和`const`两种新的变量声明方式，这两种声明方式都可以用于 **块级作用域** 。另外 `const` 则主要用于定义 **常量**，由`const`声明的变量都是 **值不可变** 的。
+
+### let 和 var 的异同比较
+
+|           | let  | var  |
+| :-------: | :--: | :--: |
+|   定义变量    |  √   |  √   |
+|   可被释放    |  √   |  √   |
+|   可被提升    |      |  √   |
+|  重复定义检查   |  √   |      |
+| 可被用于块级作用域 |  √   |      |
+
+当然最经典的还是那个循环打印的例子了，这个例子主要说明了 `let` 可用于 **块级作用域**。至于为什么，还是跟闭包有关系，`setTimeout` 中的匿名函数形成闭包，在执行的时候它会沿着作用域链找到 `i ` 值的，使用 `var` 声明匿名函数的作用域链上只会包含函数本身以及全局作用域，但是使用 `let` 的话，还会有一个 **块级作用域 **被保留下来，因此打印的结果不同。
+
+```javascript
+for(var i = 0; i < 5; i++){
+  setTimeout(()=>console.log(i),1000*i)
+}
+// 输出：5 5 5 5 5
+for(let i = 0; i < 5; i++){
+  setTimeout(()=>console.log(i),1000*i)
+}
+// 输出：0 1 2 3 4
+```
+
+
+
+### const 用例
+
+1. 定义一个完全不的值不可变对象
+
+   使用 `const` 定义数字、字符串、布尔值等都会使得该变量无法被改动，但是定义对象的时候，虽然对象的引用无法改变，但是内部的值还是可以随意增减和删除的。那么怎么定义一个值不变的对象呢？
+
+   ```javascript
+   function deepFreeze (o) {
+     let prop, propKey;
+     Object.freeze(o); // 首先冻结第一层对象.
+     for (propKey in o) {
+       prop = o[propKey];
+       if (!o.hasOwnProperty(propKey) || !(typeof prop === "object") || Object.isFrozen(prop)) {
+         // 跳过原型链上的属性和已冻结的对象.
+         continue;
+       }
+
+       deepFreeze(prop); //递归调用.
+     }
+   }
+
+   const obj = {
+     a: {
+       b: 'inner'
+     }
+   }
+
+   deepFreeze(obj)
+   ```
+
+2. 解析 JSON
+
+   使用 `let` 和 `const`结合 ES6 的其他新特性能够更加方便的解析 JSON 数据。
+
+   ```javascript
+   const responseData = `
+   [{"name":"Nick","gender":1,"species":"Fox"},{"name":"Judy","gender":0,"species":"Bunny"}]
+   `
+   // 现将一个 JSON 数据解析成对象
+   const Zootopia = JSON.parse(responseData)
+
+   for(const {name, species} of Zootopia){
+     console.log(`Hi, I am ${name}, and I am a ${species}`)
+   }
+   ```
+
+   ​
+
+## 箭头函数
+
+### 使用语法
+
+1. 单一参数的单行箭头函数
+
+   `arg => statement`
+
+   单行箭头函数只能包含一条语句。ES6提供了多行的箭头函数语法，所以在使用单行箭头函数的时候，不要换行。
+
+   如果是错误抛出（throw）等非表达式语句，需要使用大括号，例如：
+
+   ```javascript
+   const fn = (x) => { throw new Error('some error') }
+   ```
+
+   如果直接返回一个对象字面量，则需要使用圆括号而不是大括号，否则会被当做多行的箭头函数。例如：
+
+   ```javascript
+   const id = [ 1, 2, 3 ]
+   const user = id.map(id => ({ id: id }))
+   // user = [ { id: 1 }, { id: 2 }, { id: 3 }]
+   ```
+
+2. 多行参数的单行箭头函数
+
+   `(arg1, arg2) => statement`
+
+3. 多行箭头函数
+
+   `arg => {...}`
+
+   `(arg1, arg2) => {...}`
+
+   参数列表的右括弧、箭头需要保持在同一行，例如：
+
+   ```javascript
+   const fn = (x, y) => {
+     return x * y;
+   }
+   ```
+
+4. 无参数箭头函数
+
+   `() => statement`
+
+
+
+### this 穿透
+
+除了书写简介之外，箭头函数另一个非常重要的特性就是它的`this`，它用于将函数内部的`this`延伸至上一层作用域中，即上一层的上下文会穿透到内层的箭头函数中。
+
+```javascript
+const obj = {
+  hello: 'world',
+  foo() {
+    const bar = () => this.hello
+    
+    return bar
+  }
+}
+
+window.world = 'ES6'
+window.bar = obj.foo()
+window.bar() // 'world'
+```
+
+如果使用`Babel`等编译工具来将其转换为ES5的代码，`obj.foo`函数如下：
+
+```javascript
+foo: function foo() {
+    var _this = this;
+
+    var bar = function bar() {
+      return _this.hello;
+    };
+
+    return bar;
+  }
+```
+
+箭头函数对上下文的绑定是强制的，无法通过 `apply` 或者 `call` 方法改变。另外在箭头函数中也没有 `arguments`、`callee` 、`caller` 等对象。
+
+
+
+## Promise
+
+在实际开发中会使用到很多的异步开发，比如浏览器的动画效果、服务器端IO操作等等。在 ES2015 之前早已有 `Promise/A`和`Promise/A+`等概念。`Promise`最大的目的在于 **可以让异步代码变得竟然有序**。
+
+没有 `Promise` ：
+
+```javascript
+animate1( () => {
+  animate2( () => {
+    animate3( () => {
+      animate4( () => {
+        // ...
+      }
+    })
+  })
+})
+```
+
+使用了 `Promise` ：
+
+```javascript
+animate1()
+  .then( () => animate2() )
+  .then( () => animate3() )
+  .then( () => animate4() )
+```
+
+*(其实 Promise 也不能完全解决回调地狱的问题，这个在面试的时候还被面试官怼了一下，由此又展开了关于async/await 的讨论，不过这个不属于 ES2015)*
+
+### 基本语法
+
+1. 首先要先 **new** 一个 `Promise` 对象。
+
+    `Promise` 的构造函数中需要传入一个函数，这个函数内部的逻辑将会 **同步执行**。
+
+   ```javascript
+   // 这个事情要异步处理啦
+   function asyncMethod(...args) {
+     return new Promise((resolve, reject) => {
+       // ...
+     })
+   }
+   ```
+
+2. 然后通过 `resolve( value )` 和 `reject( reason )` 方法控制 **异步** 操作，改变 `Promise` 的状态。
+
+    `Promise` 的状态就会由 `Pending`  变为 `Fulfilled` 或者 `Rejected` 。**一旦进入新的状态就不会再改变**。resolve( value ) 或者 reject( reason ) 是异步执行的，不会影响后面的代码执行：
+
+   ```javascript
+   function asyncMethod(...args) {
+     return new Promise((resolve, reject) => {
+       resolve('success');
+     	console.log('start promise')
+     })
+   }
+
+   asyncMethod()
+   // 输出 "start promise"
+   // Promise {[[PromiseStatus]]: "resolved", [[PromiseValue]]: undefined}
+   ```
+
+   但是一旦出现 `throw` 语句，`Promise` 对象便会直接进入 **失败** 状态，并以 `throw` 抛出的值作为错误值进行处理。
+
+3. 再然后通过 `promise.then()` 和 `promise.catch()` 定义 **异步** 方法（PS：这两种 **异步方法** 属于 **micro task**  [read more](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)）。
+
+   `resolve` 或者 `reject` 都是先在 **步骤2** 中使用了然后再在 **步骤3** 中定义的。`then` 可以处理成功和失败两种状态的 `Promise` 对象，`catch` 仅仅处理错误情况。
+
+   ```javascript
+   // 定义成功或者失败情况下的异步方法
+   asyncMethod()
+     .then(arg => console.log(arg),
+           err => console.log(err)) 
+   // 定义失败情况下的异步方法
+   asyncMethod()
+     .catch(err => console.log(err))
+   ```
+
+4.  **步骤3**的方法会返回一个新的 `Promise` 对象，因此可以继续 **步骤2**、 **步骤3** ，这就是 **链式调用**
+
+   ```javascript
+   asyncMethod()
+     // 会返回一个进入成功状态的Promise对象，并把args作为resolve的参数传入
+     .then((...args) => args)
+     .then((...args) => console.log(args.join('\t'))) 
+     // 直接返回该Promise对象
+     .then((...args) => Promise.reject('some error')) 
+     // 如果上面步骤中任何一步出现了错误都会传递到这一步进行错误处理
+     .catch(err => console.log(err)) 
+     .then((...args) => args)
+   // 输出
+   // "start promise"
+   // "success"
+   // "some error"
+   // 最终返回一个 Promise 对象（并没有处理）
+   // Promise {[[PromiseStatus]]: "resolved", [[PromiseValue]]: Array(1)}
+   ```
+
+
+
+### 高级方法
+
+1.  `Promise.all( iterable )`
+
+   如果可迭代对象中的对象**都** 进入了 **成功** 状态，那么该方法返回一个进入 **成功** 状态的 Promise 对象，并以一个 **可迭代数组** 来承载其中的所有返回值。
+
+   如果可迭代对象中的 Promise 对象的其中 **任何一个** 进入了 **失败** 状态，那么该方法返回的 Promise 对象也进入 **失败** 状态，并以那个错误信息作为自己的错误信息。
+
+2.  `Promise.race( iterable )`
+
+   这个方法监听所有可迭代对象中的状态，根据 **第一个** 完成（**成功**或者 **失败**）的 Promise 对象的状态而改变。
+
+   如果可迭代对象中的 Promise 对象的其中一个进入了失败状态，那么该方法返回的 Promise 对象也进入失败状态，并以那个错误信息作为自己的错误信息。
+
+
+
+## 模块化
+
+**ES Module** 的设计思想是尽量静态化，使得编译时就能确定模块的依赖关系，JS 引擎对脚本静态分析的时候，遇到模块加载命令 `import` 就会生成一个制度。**CommonJS** 和 **AMD** 模块，都只能在运行时确定这些东西。比如，**CommonJS** 模块就是 **对象**，输入时必须查找对象属性。
+
+### 引入模块
+
+1. 引入默认模块
+
+   `import namespace from 'module-name'`
+
+2. 引入模块部分接口
+
+   `import { member1, member2 } from 'module-name'`
+
+   `import { member1 as alias } from 'module-name'`
+
+3. 引入全部局部接口到指定命名空间
+
+   `import * as namespace from 'module-name'`
+
+4. 混合引入默认接口和命名接口
+
+   `import  { default as <default name>, method1 } from 'module-name' ` 
+
+5. 不引入接口，仅运行代码
+
+   `import 'system-apply'`
+
+
+
+### 暴露模块
+
+1. 暴露单一接口
+
+   `export <statement>`
+
+   当我们需要定义一个项目内的工具集模块，则需要将其中定义的函数或者对象暴露到 **文件所定义的模块** 上。 **export** 语句后跟着的语句需要具有声明部分和赋值部分。
+
+2. 暴露模块默认接口
+
+   `export default <value>`
+
+   在某些时候，一个模块只需要暴露一个接口，就没必要让这个工具类成为该模块的一部分，而是要让这个类直接成为这个模块。**ES Module** 中便提供了这样的接口，让一个值直接成为模块的内容而无需声明部分。
+
+3. 混合使用暴露接口语句
+
+   1和2中的语句可以同时使用，并不冲突。开发者可以为一个模块同时定义默认接口和其他命名接口。
+
+4. 从其他模块暴露接口
+
+   `export * from  'other-module'`
+
+   `export { member1, member2 } from 'module-name'`
+
+   `export { default } from 'module'`
+
+   **ES Module** 可以通过其他模块所暴露的接口来作为当前模块接口的方法，这种需求一般在 **第三方类库** 中较为常用。

@@ -3,7 +3,7 @@ layout:     post
 title:      "基于Java的网站开发环境配置"
 date:       2017-05-10 15:48:30
 author:     "Joan"
-tags:		["web开发","java"]
+tags:		["Java"]
 ---
 
 ## Java 环境配置

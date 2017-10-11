@@ -4,7 +4,7 @@ title:      "JavaScript中的闭包"
 subtitle:   "内存泄漏与调试方法"
 date:       2017-09-26 16:35:14
 author:     "Joan"
-tags:       ["closure"]
+tags:       ["JS"]
 ---
 
 ## 函数的作用域链

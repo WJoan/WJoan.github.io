@@ -4,7 +4,7 @@ title:      "搭建 RTMP 直播服务器"
 subtitle:   "nginx-rtmp-module的使用"
 date:       2017-06-15 16:38:26
 author:     "Joan"
-tags:		["web开发"]
+tags:		["nginx"]
 ---
 
 # 整体架构
@@ -36,12 +36,12 @@ tags:		["web开发"]
 
 `Nginx` ("engine x") 是一个高性能、轻量级的 HTTP 和反向代理服务器，也是一个邮件代理 (IMAP/POP3/SMTP) 服务器配置文件中。`Nginx` 能支持处理百万级的 TCP 处理，10万以上的并发连接，并且是一种非常好的跨平台的服务器。
 
-|常见应用场景|主要功能|
-|------------|----|
-|反向代理|以代理服务器来接受连接请求，然后将请求转发给内部网络上的服务器，并将从服务器上得到的结果返回给请求连接的客户端|
-|负载均衡|简单而言就是当有2台或以上服务器时，根据规则随机的将请求分发到指定的服务器上处理，负载均衡配置一般都需要同时配置反向代理，通过反向代理跳转到负载均衡。|
-|HTTP 服务器|Nginx 本身也是一个静态资源的服务器，当只有静态资源的时候，就可以使用 Nginx 来做服务器。同时现在也很流行动静分离，所有静态请求都由 nginx 处理，而所有动态请求都转发给 tomcat 处理|
-|正向代理|一个位于客户端和原始服务器(origin server) 之间的服务器，为了从原始服务器取得内容，客户端向代理发送一个请求并指定目标 (原始服务器)，然后代理向原始服务器转交请求并将获得的内容返回给客户端。|
+| 常见应用场景   | 主要功能                                     |
+| -------- | ---------------------------------------- |
+| 反向代理     | 以代理服务器来接受连接请求，然后将请求转发给内部网络上的服务器，并将从服务器上得到的结果返回给请求连接的客户端 |
+| 负载均衡     | 简单而言就是当有2台或以上服务器时，根据规则随机的将请求分发到指定的服务器上处理，负载均衡配置一般都需要同时配置反向代理，通过反向代理跳转到负载均衡。 |
+| HTTP 服务器 | Nginx 本身也是一个静态资源的服务器，当只有静态资源的时候，就可以使用 Nginx 来做服务器。同时现在也很流行动静分离，所有静态请求都由 nginx 处理，而所有动态请求都转发给 tomcat 处理 |
+| 正向代理     | 一个位于客户端和原始服务器(origin server) 之间的服务器，为了从原始服务器取得内容，客户端向代理发送一个请求并指定目标 (原始服务器)，然后代理向原始服务器转交请求并将获得的内容返回给客户端。 |
 
 ### 1. 从github下载nginx-rtmp-module
 
@@ -214,12 +214,12 @@ cd /usr/local/nginx/sbin
 
 RTMP 端口: 1935, HTTP 端口: 8080
 
-|测试URL				|应用							   |
-|-----------------------|----------------------------------|
-|http://localhost:8080/ | play myapp/mystream with JWPlayer|
-|http://localhost:8080/record.html | capture myapp/mystream from webcam with old JWPlayer|
-|http://localhost:8080/rtmp-publisher/player.html | play myapp/mystream with the test flash applet|
-|http://localhost:8080/rtmp-publisher/publisher.html | capture myapp/mystream with the test flash applet|
+| 测试URL                                    | 应用                                       |
+| ---------------------------------------- | ---------------------------------------- |
+| http://localhost:8080/                   | play myapp/mystream with JWPlayer        |
+| http://localhost:8080/record.html        | capture myapp/mystream from webcam with old JWPlayer |
+| http://localhost:8080/rtmp-publisher/player.html | play myapp/mystream with the test flash applet |
+| http://localhost:8080/rtmp-publisher/publisher.html | capture myapp/mystream with the test flash applet |
 
 以上为默认端口时，测试 URL 以及对应的应用。比如打开 player.html 就会看到如下的画面，由于还没有推送视频流所以只有一个播放器的框框。
 
