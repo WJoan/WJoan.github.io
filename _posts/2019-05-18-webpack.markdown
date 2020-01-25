@@ -1,0 +1,407 @@
+---
+layout:     post
+title:      "Webpack 基本配置"
+subtitle:   "《Webpack 深入浅出》阅读笔记"
+date:       2019-05-18 19:27:01
+author:     "Joan"
+tags:		["Webpack"]
+---
+
+# Webpack
+
+Webpack 启动后会从 Entry 里配置的 Module 开始递归解析 Entry 依赖的所有 Module。 每找到一个 Module， 就会根据配置的 Loader 去找出对应的转换规则，对 Module 进行转换后，再解析出当前 Module 依赖的 Module。 这些模块会以 Entry 为单位进行分组，一个 Entry 和其所有依赖的 Module 被分到一个组也就是一个 Chunk。最后 Webpack 会把所有 Chunk 转换成文件输出。 在整个流程中 Webpack 会在恰当的时机执行 Plugin 里定义的逻辑。
+
+- 代码转换：TypeScript 编译成 JavaScript、SCSS 编译成 CSS 等。
+- 文件优化：压缩 JavaScript、CSS、HTML 代码，压缩合并图片等。
+- 代码分割：提取多个页面的公共代码、提取首屏不需要执行部分的代码让其异步加载。
+- 模块合并：在采用模块化的项目里会有很多个模块和文件，需要构建功能把模块分类合并成一个文件。
+- 自动刷新：监听本地源代码的变化，自动重新构建、刷新浏览器。
+- 代码校验：在代码被提交到仓库前需要校验代码是否符合规范，以及单元测试是否通过。
+- 自动发布：更新完代码后，自动构建出线上发布代码并传输给发布系统。
+
+
+
+## 整体配置结构
+
+```js
+const path = require('path');
+
+module.exports = {
+  // entry 表示 入口，Webpack 执行构建的第一步将从 Entry 开始，可抽象成输入。
+  // 类型可以是 string | object | array   
+  entry: './app/entry', // 只有1个入口，入口只有1个文件
+  entry: ['./app/entry1', './app/entry2'], // 只有1个入口，入口有2个文件
+  entry: { // 有2个入口
+    a: './app/entry-a',
+    b: ['./app/entry-b1', './app/entry-b2']
+  },
+
+  // 如何输出结果：在 Webpack 经过一系列处理后，如何输出最终想要的代码。
+  output: {
+    // 输出文件存放的目录，必须是 string 类型的绝对路径。
+    path: path.resolve(__dirname, 'dist'),
+
+    // 输出文件的名称
+    filename: 'bundle.js', // 完整的名称
+    filename: '[name].js', // 当配置了多个 entry 时，通过名称模版为不同的 entry 生成不同的文件名称
+    filename: '[chunkhash].js', // 根据文件内容 hash 值生成文件名称，用于浏览器长时间缓存文件
+
+    // 发布到线上的所有资源的 URL 前缀，string 类型
+    publicPath: '/assets/', // 放到指定目录下
+    publicPath: '', // 放到根目录下
+    publicPath: 'https://cdn.example.com/', // 放到 CDN 上去
+
+    // 导出库的名称，string 类型
+    // 不填它时，默认输出格式是匿名的立即执行函数
+    library: 'MyLibrary',
+
+    // 导出库的类型，枚举类型，默认是 var
+    // 可以是 umd | umd2 | commonjs2 | commonjs | amd | this | var | assign | window | global | jsonp ，
+    libraryTarget: 'umd', 
+
+    // 是否包含有用的文件路径信息到生成的代码里去，boolean 类型
+    pathinfo: true, 
+
+    // 附加 Chunk 的文件名称
+    chunkFilename: '[id].js',
+    chunkFilename: '[chunkhash].js',
+
+    // JSONP 异步加载资源时的回调函数名称，需要和服务端搭配使用
+    jsonpFunction: 'myWebpackJsonp',
+
+    // 生成的 Source Map 文件名称
+    sourceMapFilename: '[file].map',
+
+    // 浏览器开发者工具里显示的源码模块名称
+    devtoolModuleFilenameTemplate: 'webpack:///[resource-path]',
+
+    // 异步加载跨域的资源时使用的方式
+    crossOriginLoading: 'use-credentials',
+    crossOriginLoading: 'anonymous',
+    crossOriginLoading: false,
+  },
+
+  // 配置模块相关
+  module: {
+    rules: [ // 配置 Loader
+      {  
+        test: /\.jsx?$/, // 正则匹配命中要使用 Loader 的文件
+        include: [ // 只会命中这里面的文件
+          path.resolve(__dirname, 'app')
+        ],
+        exclude: [ // 忽略这里面的文件
+          path.resolve(__dirname, 'app/demo-files')
+        ],
+        use: [ // 使用那些 Loader，有先后次序，从后往前执行
+          'style-loader', // 直接使用 Loader 的名称
+          {
+            loader: 'css-loader',      
+            options: { // 给 html-loader 传一些参数
+            }
+          }
+        ]
+      },
+    ],
+    noParse: [ // 不用解析和处理的模块
+      /special-library\.js$/  // 用正则匹配
+    ],
+  },
+
+  // 配置插件
+  plugins: [
+  ],
+
+  // 配置寻找模块的规则
+  resolve: { 
+    modules: [ // 寻找模块的根目录，array 类型，默认以 node_modules 为根目录
+      'node_modules',
+      path.resolve(__dirname, 'app')
+    ],
+    extensions: ['.js', '.json', '.jsx', '.css'], // 模块的后缀名
+    alias: { // 模块别名配置，用于映射模块
+       // 把 'module' 映射 'new-module'，同样的 'module/path/file' 也会被映射成 'new-module/path/file'
+      'module': 'new-module',
+      // 使用结尾符号 $ 后，把 'only-module' 映射成 'new-module'，
+      // 但是不像上面的，'module/path/file' 不会被映射成 'new-module/path/file'
+      'only-module$': 'new-module', 
+    },
+    alias: [ // alias 还支持使用数组来更详细的配置
+      {
+        name: 'module', // 老的模块
+        alias: 'new-module', // 新的模块
+        // 是否是只映射模块，如果是 true 只有 'module' 会被映射，如果是 false 'module/inner/path' 也会被映射
+        onlyModule: true, 
+      }
+    ],
+    symlinks: true, // 是否跟随文件软链接去搜寻模块的路径
+    descriptionFiles: ['package.json'], // 模块的描述文件
+    mainFields: ['main'], // 模块的描述文件里的描述入口的文件的字段名称
+    enforceExtension: false, // 是否强制导入语句必须要写明文件后缀
+  },
+
+  // 输出文件性能检查配置
+  performance: { 
+    hints: 'warning', // 有性能问题时输出警告
+    hints: 'error', // 有性能问题时输出错误
+    hints: false, // 关闭性能检查
+    maxAssetSize: 200000, // 最大文件大小 (单位 bytes)
+    maxEntrypointSize: 400000, // 最大入口文件大小 (单位 bytes)
+    assetFilter: function(assetFilename) { // 过滤要检查的文件
+      return assetFilename.endsWith('.css') || assetFilename.endsWith('.js');
+    }
+  },
+
+  devtool: 'source-map', // 配置 source-map 类型
+
+  context: __dirname, // Webpack 使用的根目录，string 类型必须是绝对路径
+
+  // 配置输出代码的运行环境
+  target: 'web', // 浏览器，默认
+  target: 'webworker', // WebWorker
+  target: 'node', // Node.js，使用 `require` 语句加载 Chunk 代码
+  target: 'async-node', // Node.js，异步加载 Chunk 代码
+  target: 'node-webkit', // nw.js
+  target: 'electron-main', // electron, 主线程
+  target: 'electron-renderer', // electron, 渲染线程
+
+  externals: { // 使用来自 JavaScript 运行环境提供的全局变量
+    jquery: 'jQuery'
+  },
+
+  stats: { // 控制台输出日志控制
+    assets: true,
+    colors: true,
+    errors: true,
+    errorDetails: true,
+    hash: true,
+  },
+
+  devServer: { // DevServer 相关的配置
+    proxy: { // 代理到后端服务接口
+      '/api': 'http://localhost:3000'
+    },
+    contentBase: path.join(__dirname, 'public'), // 配置 DevServer HTTP 服务器的文件根目录
+    compress: true, // 是否开启 gzip 压缩
+    historyApiFallback: true, // 是否开发 HTML5 History API 网页
+    hot: true, // 是否开启模块热替换功能
+    https: false, // 是否开启 HTTPS 模式
+    },
+
+    profile: true, // 是否捕捉 Webpack 构建的性能信息，用于分析什么原因导致构建性能不佳
+
+    cache: false, // 是否启用缓存提升构建速度
+
+    watch: true, // 是否开始
+    watchOptions: { // 监听模式选项
+    // 不监听的文件或文件夹，支持正则匹配。默认为空
+    ignored: /node_modules/,
+    // 监听到变化发生后会等300ms再去执行动作，防止文件更新太快导致重新编译频率太高
+    // 默认为300ms 
+    aggregateTimeout: 300,
+    // 判断文件是否发生变化是不停的去询问系统指定文件有没有变化，默认每隔1000毫秒询问一次
+    poll: 1000
+  },
+}
+```
+
+
+
+## 多种配置类型
+除了通过导出一个 Object 来描述 Webpack 所需的配置外，还有其它更灵活的方式，以简化不同场景的配置。 下面来一一介绍它们。
+
+
+
+### 导出一个 Function
+在大多数时候你需要从同一份源代码中构建出多份代码，例如一份用于开发时，一份用于发布到线上。
+
+如果采用导出一个 Object 来描述 Webpack 所需的配置的方法，需要写两个文件。 一个用于开发环境，一个用于线上环境。再在启动时通过 webpack --config webpack.config.js 指定使用哪个配置文件。
+
+采用导出一个 Function 的方式，能通过 JavaScript 灵活的控制配置，做到只用写一个配置文件就能完成以上要求。
+
+导出一个 Function 的使用方式如下：
+
+```js
+const path = require('path');
+const UglifyJsPlugin = require('webpack/lib/optimize/UglifyJsPlugin');
+
+module.exports = function (env = {}, argv) {
+  const plugins = [];
+
+  const isProduction = env['production'];
+
+  // 在生成环境才压缩
+  if (isProduction) {
+    plugins.push(
+      // 压缩输出的 JS 代码
+      new UglifyJsPlugin()
+    )
+  }
+
+  return {
+    plugins: plugins,
+    // 在生成环境不输出 Source Map
+    devtool: isProduction ? undefined : 'source-map',
+  };
+}
+```
+
+在运行 Webpack 时，会给这个函数传入2个参数，分别是：
+
+1. `env`：当前运行时的 Webpack 专属环境变量，`env` 是一个 Object。读取时直接访问 Object 的属性，设置它需要在启动 Webpack 时带上参数。例如启动命令是 `webpack --env.production --env.bao=foo`时，则 `env` 的值是 `{"production":"true","bao":"foo"}`。
+2. `argv`：代表在启动 Webpack 时所有通过命令行传入的参数，例如 `--config`、`--env`、`--devtool`，可以通过 `webpack -h` 列出所有 Webpack 支持的命令行参数。
+
+就以上配置文件而言，在开发时执行命令 `webpack` 构建出方便调试的代码，在需要构建出发布到线上的代码时执行 `webpack --env.production` 构建出压缩的代码。
+
+
+
+### 导出一个返回 Promise 的函数
+
+在有些情况下你不能以同步的方式返回一个描述配置的 Object，Webpack 还支持导出一个返回 Promise 的函数，使用如下：
+
+```js
+module.exports = function(env = {}, argv) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve({
+        // ...
+      })
+    }, 5000)
+  })
+}
+```
+
+
+
+### 导出多份配置
+
+除了只导出一份配置外，Webpack 还支持导出一个数组，数组中可以包含每份配置，并且每份配置都会执行一遍构建。
+
+> 注意本特性从 Webpack 3.1.0 版本才开始支持。
+
+使用如下：
+
+```js
+module.exports = [
+  // 采用 Object 描述的一份配置
+  {
+    // ...
+  },
+  // 采用函数描述的一份配置
+  function() {
+    return {
+      // ...
+    }
+  },
+  // 采用异步函数描述的一份配置
+  function() {
+    return Promise();
+  }
+]
+```
+
+以上配置会导致 Webpack 针对这三份配置执行三次不同的构建。
+
+这特别适合于用 Webpack 构建一个要上传到 Npm 仓库的库，因为库中可能需要包含多种模块化格式的代码，例如 CommonJS、UMD。
+
+
+
+### 配置总结
+
+从前面的配置看来选项很多，Webpack 内置了很多功能。 你不必都记住它们，只需要大概明白 Webpack 原理和核心概念去判断选项大致属于哪个大模块下，再去查详细的使用文档。
+
+通常你可用如下经验去判断如何配置 Webpack：
+
+- 想让源文件加入到构建流程中去被 Webpack 控制，配置 `entry`。
+- 想自定义输出文件的位置和名称，配置 `output`。
+- 想自定义寻找依赖模块时的策略，配置 `resolve`。
+- 想自定义解析和转换文件的策略，配置 `module`，通常是配置 `module.rules` 里的 Loader。
+- 其它的大部分需求可能要通过 Plugin 去实现，配置 `plugin`。
+
+
+
+# 常用 Loaders
+
+本节将对本书用到的及其它常用 Loader 做一个汇总，以方便你在这快速查找到你需要的 Loader。
+
+### 加载文件
+
+- **[raw-loader](https://github.com/webpack-contrib/raw-loader)**：把文本文件的内容加载到代码中去，在 [3-20加载SVG](https://webpack.wuhaolin.cn/3实战/3-20加载SVG.html) 中有介绍。
+- **[file-loader](https://github.com/webpack-contrib/file-loader)**：把文件输出到一个文件夹中，在代码中通过相对 URL 去引用输出的文件，在 [3-19加载图片](https://webpack.wuhaolin.cn/3实战/3-19加载图片.html)、[3-20加载 SVG](https://webpack.wuhaolin.cn/3实战/3-20加载SVG.html)、[4-9 CDN 加速](https://webpack.wuhaolin.cn/4优化/4-9CDN加速.html) 中有介绍。
+- **[url-loader](https://github.com/webpack-contrib/url-loader)**：和 file-loader 类似，但是能在文件很小的情况下以 base64 的方式把文件内容注入到代码中去，在 [3-19加载图片](https://webpack.wuhaolin.cn/3实战/3-19加载图片.html)、[3-20加载 SVG](https://webpack.wuhaolin.cn/3实战/3-20加载SVG.html) 中有介绍。
+- **[source-map-loader](https://github.com/webpack-contrib/source-map-loader)**：加载额外的 Source Map 文件，以方便断点调试，在 [3-21加载 Source Map](https://webpack.wuhaolin.cn/3实战/3-21加载SourceMap.html) 中有介绍。
+- **[svg-inline-loader](https://github.com/webpack-contrib/svg-inline-loader)**：把压缩后的 SVG 内容注入到代码中，在 [3-20加载 SVG](https://webpack.wuhaolin.cn/3实战/3-20加载SVG.html) 中有介绍。
+- **[node-loader](https://github.com/webpack-contrib/node-loader)**：加载 Node.js 原生模块 `.node` 文件。
+- **[image-loader](https://github.com/tcoopman/image-webpack-loader)**：加载并且压缩图片文件。
+- **[json-loader](https://github.com/webpack-contrib/json-loader)**：加载 JSON 文件。
+- **[yaml-loader](https://github.com/okonet/yaml-loader)**：加载 YAML 文件。
+
+### 编译模版
+
+- **[pug-loader](https://github.com/pugjs/pug-loader)**：把 Pug 模版转换成 JavaScript 函数返回。
+- **[handlebars-loader](https://github.com/pcardune/handlebars-loader)**：把 Handlebars 模版编译成函数返回。
+- **[ejs-loader](https://github.com/okonet/ejs-loader)**：把 EJS 模版编译成函数返回。
+- **[haml-loader](https://github.com/AlexanderPavlenko/haml-loader)**：把 HAML 代码转换成 HTML。
+- **[markdown-loader](https://github.com/peerigon/markdown-loader)**：把 Markdown 文件转换成 HTML。
+
+### 转换脚本语言
+
+- **[babel-loader](https://github.com/babel/babel-loader)**：把 ES6 转换成 ES5，在[3-1使用 ES6 语言](https://webpack.wuhaolin.cn/3实战/3-1使用ES6语言.html)中有介绍。
+- **[ts-loader](https://github.com/TypeStrong/ts-loader)**：把 TypeScript 转换成 JavaScript，在[3-2使用 TypeScript 语言](https://webpack.wuhaolin.cn/3实战/3-2使用TypeScript语言.html)中有遇到。
+- **[awesome-typescript-loader](https://github.com/s-panferov/awesome-typescript-loader)**：把 TypeScript 转换成 JavaScript，性能要比 ts-loader 好。
+- **[coffee-loader](https://github.com/webpack-contrib/coffee-loader)**：把 CoffeeScript 转换成 JavaScript。
+
+### 转换样式文件
+
+- **[css-loader](https://github.com/webpack-contrib/css-loader)**：加载 CSS，支持模块化、压缩、文件导入等特性。
+- **[style-loader](https://github.com/webpack-contrib/style-loader)**：把 CSS 代码注入到 JavaScript 中，通过 DOM 操作去加载 CSS。
+- **[sass-loader](https://github.com/webpack-contrib/sass-loader)**：把 SCSS/SASS 代码转换成 CSS，在[3-4使用 SCSS 语言](https://webpack.wuhaolin.cn/3实战/3-4使用SCSS语言.html)中有介绍。
+- **[postcss-loader](https://github.com/postcss/postcss-loader)**：扩展 CSS 语法，使用下一代 CSS，在[3-5使用 PostCSS](https://webpack.wuhaolin.cn/3实战/3-5使用PostCSS.html)中有介绍。
+- **[less-loader](https://github.com/webpack-contrib/less-loader)**：把 Less 代码转换成 CSS 代码。
+- **[stylus-loader](https://github.com/shama/stylus-loader)**：把 Stylus 代码转换成 CSS 代码。
+
+### 检查代码
+
+- **[eslint-loader](https://github.com/MoOx/eslint-loader)**：通过 ESLint 检查 JavaScript 代码，在 [3-16检查代码](https://webpack.wuhaolin.cn/3实战/3-16检查代码.html)中有介绍。
+- **[tslint-loader](https://github.com/wbuchwalter/tslint-loader)**：通过 TSLint 检查 TypeScript 代码。
+- **[mocha-loader](https://github.com/webpack-contrib/mocha-loader)**：加载 Mocha 测试用例代码。
+- **[coverjs-loader](https://github.com/webpack-contrib/coverjs-loader)**：计算测试覆盖率。
+
+### 其它
+
+- **[vue-loader](https://github.com/vuejs/vue-loader)**：加载 Vue.js 单文件组件，在[3-7使用 Vue 框架](https://webpack.wuhaolin.cn/3实战/3-7使用Vue框架.html)中有介绍。
+- **[i18n-loader](https://github.com/webpack-contrib/i18n-loader)**：加载多语言版本，支持国际化。
+- **[ignore-loader](https://github.com/cherrry/ignore-loader)**：忽略掉部分文件，在[3-11构建同构应用](https://webpack.wuhaolin.cn/3实战/3-11构建同构应用.html)中有介绍。
+- **[ui-component-loader](https://github.com/gwuhaolin/ui-component-loader)**：按需加载 UI 组件库，例如在使用 antd UI 组件库时，不会因为只用到了 Button 组件而打包进所有的组件。
+
+
+
+# 常用 Plugins
+
+本节将对本书用到的及其它常用 Plugin 做一个汇总，以方便你在这快速查找到你需要的 Plugin。
+
+### 用于修改行为
+
+- **[define-plugin](https://webpack.js.org/plugins/define-plugin/)**：定义环境变量，在[4-7区分环境](https://webpack.wuhaolin.cn/4优化/4-7区分环境.html)中有介绍。
+- **[context-replacement-plugin](https://webpack.js.org/plugins/context-replacement-plugin/)**：修改 `require` 语句在寻找文件时的默认行为。
+- **[ignore-plugin](https://webpack.js.org/plugins/ignore-plugin/)**：用于忽略部分文件。
+
+### 用于优化
+
+- **[commons-chunk-plugin](https://webpack.js.org/plugins/commons-chunk-plugin/)**：提取公共代码，在[4-11提取公共代码](https://webpack.wuhaolin.cn/4优化/4-11提取公共代码.html)中有介绍。
+- **[extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin)**：提取 JavaScript 中的 CSS 代码到单独的文件中，在[1-5使用 Plugin](https://webpack.wuhaolin.cn/1入门/1-5使用Plugin.html) 中有介绍。
+- **[prepack-webpack-plugin](https://github.com/gajus/prepack-webpack-plugin)**：通过 Facebook 的 Prepack 优化输出的 JavaScript 代码性能，在 [4-13使用 Prepack](https://webpack.wuhaolin.cn/4优化/4-13使用Prepack.html) 中有介绍。
+- **[uglifyjs-webpack-plugin](https://github.com/webpack-contrib/uglifyjs-webpack-plugin)**：通过 UglifyES 压缩 ES6 代码，在 [4-8压缩代码](https://webpack.wuhaolin.cn/4优化/4-8压缩代码.html)中有介绍。
+- **[webpack-parallel-uglify-plugin](https://github.com/gdborton/webpack-parallel-uglify-plugin)**：多进程执行 UglifyJS 代码压缩，提升构建速度。
+- **[imagemin-webpack-plugin](https://www.npmjs.com/package/imagemin-webpack-plugin)**：压缩图片文件。
+- **[webpack-spritesmith](https://www.npmjs.com/package/webpack-spritesmith)**：用插件制作雪碧图。
+- **[ModuleConcatenationPlugin](https://webpack.js.org/plugins/module-concatenation-plugin/)**：开启 Webpack Scope Hoisting 功能，在[4-14开启 ScopeHoisting](https://webpack.wuhaolin.cn/4优化/4-14开启ScopeHoisting.html)中有介绍。
+- **[dll-plugin](https://webpack.js.org/plugins/dll-plugin/)**：借鉴 DDL 的思想大幅度提升构建速度，在[4-2使用 DllPlugin](https://webpack.wuhaolin.cn/4优化/4-2使用DllPlugin.html)中有介绍。
+- **[hot-module-replacement-plugin](https://webpack.js.org/plugins/hot-module-replacement-plugin/)**：开启模块热替换功能。
+
+### 其它
+
+- **[serviceworker-webpack-plugin](https://github.com/oliviertassinari/serviceworker-webpack-plugin)**：给网页应用增加离线缓存功能，在[3-14 构建离线应用](https://webpack.wuhaolin.cn/3实战/3-14构建离线应用.html)中有介绍。
+- **[stylelint-webpack-plugin](https://github.com/JaKXz/stylelint-webpack-plugin)**：集成 stylelint 到项目中，在[3-16检查代码](https://webpack.wuhaolin.cn/3实战/3-16检查代码.html)中有介绍。
+- **[i18n-webpack-plugin](https://github.com/webpack-contrib/i18n-webpack-plugin)**：给你的网页支持国际化。
+- **[provide-plugin](https://webpack.js.org/plugins/provide-plugin/)**：从环境中提供的全局变量中加载模块，而不用导入对应的文件。
+- **[web-webpack-plugin](https://github.com/gwuhaolin/web-webpack-plugin)**：方便的为单页应用输出 HTML，比 html-webpack-plugin 好用。

@@ -1,0 +1,328 @@
+---
+layout:     post
+title:      "React SSR 介绍"
+subtitle:   ""
+date:       2019-12-01 20:06:36
+author:     "Joan"
+tags:		["React", "Node"]
+---
+
+## What & Why
+
+SSR 的全称为 **Server Side Rendering** 即服务端渲染，这里的**渲染**指的其实就是***生成 HTML 页面***。那么我们为什么需要服务端渲染呢？
+
+### 渲染
+
+首先我们先来看一下原来是如何渲染的。在一般的 React 项目中，我们的 HTML 通常是这个样子：
+
+```HTML
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>React App</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
+```
+
+可以看到这段 HTML 文件中几乎没有什么内容，它渲染出来的将会是一个**空白的页面**。对于 SEO 来说，除了`meta`标签中的内容外就没有其他信息了。那么我们的页面是什么时候被渲染出来的呢？
+
+```jsx
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+ReactDOM.render(<App />, document.getElementById('root'));
+```
+
+如上显示了一个 React 程序的入口文件，**ReactDOM** 会通过 **render** 方法完成 HTML 页面的渲染，也就是说**我们的页面是通过 JavaScript 代码动态生成的，而不是一开始就存在于 HTML 文件中的。**
+
+### 白屏
+
+在 JS 文件加载并运行前，用户只能看到一个空白的页面，也就是最初只包含 `<div id="root"></div>` 结点的 HTML 解析出的 DOM 结构。
+
+<img src="{{site.baseurl}}/img/2019-12-01/1_CRiH0hUGoS3aoZaIY4H2yg.png">
+
+为了优化这个**白屏**时间，因此我们使用 **SSR** 在服务端生成一个包含具体内容的 HTML 文件，使用户在第一次访问的 HTML 之后能够马上得到一个完整可看的网页。
+
+<img src="{{site.baseurl}}/img/2019-12-01/1_jJkEQpgZ8waQ5P-W5lhxuQ.png">
+
+### SEO
+
+使用 **SSR** 的另外一个重要原因就是为了**搜索引擎优化（SEO）**，下面的视频简单介绍了什么是 SEO：
+
+<iframe width="800" height="450" src="https://www.youtube.com/embed/hF515-0Tduk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+对于商城类的应用， SEO 内容就显得比较重要了，因此我们最初的 HTML 文件中应该包含网站的一些关键内容和关键信息。
+
+
+
+## How？
+
+知道了什么是 SSR 以及为什么需要 SSR 之后，就要开始在服务端生成 HTML 页面了。
+
+### Node.js
+
+在服务端生成 HTML 的方法有很多，比如 JSP、PHP Smarty 等等，但是作为前端人员我们还是希望使用 Javascript 这个熟悉的语言来完成这项任务。这时候就需要用到 **Node.JS** 了。
+
+> **NodeJS** 是一种javascript的运行环境，能够使得 Javascript 脱离浏览器运行。[详细介绍](https://medium.com/the-node-js-collection/why-the-hell-would-you-use-node-js-4b053b94ab8e)
+
+在 Node.JS 的环境中，我们可以使用 Javascript 像其他服务端语言一样访问和更改本地文件，可以发送和接收 HTTP 请求等等。
+
+当然使用 **Node.JS** 也不仅仅是因为熟悉，还因为它可以完成客户端与服务端的**同构**。简单的说，就是我们使用一套 React 代码即可以在服务端生成页面，也可以在客户端运行完成页面交互。
+
+### 一个简单的服务
+
+下面我们根据这个简单的服务来进行说明：
+
+```javascript
+import path from 'path';
+import fs from 'fs';
+
+import React from 'react';
+import express from 'express';
+import ReactDOMServer from 'react-dom/server';
+
+import App from '../src/App';
+
+const PORT = process.env.PORT || 3006;
+const app = express();
+
+app.use(express.static('./build'));
+
+app.get('/*', (req, res) => {
+  const reactApp = ReactDOMServer.renderToString(<App />);
+
+  const indexFile = path.resolve('./build/index.html');
+  fs.readFile(indexFile, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Something went wrong:', err);
+      return res.status(500).send('Oops, better luck next time!');
+    }
+
+    return res.send(
+      data.replace('<div id="root"></div>', `<div id="root">${reactApp}</div>`)
+    );
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`😎 Server is listening on port ${PORT}`);
+});
+```
+
+1. **使用 `express` 搭建一个简单的服务：**
+
+   启动这个服务后它会监听 3006 端口，当接收到 `GET` 请求时它会返回特定的内容。
+
+   
+
+2. **生成 HTML 结点字符串：**
+
+   ```jsx
+   const reactApp = ReactDOMServer.renderToString(<App />);
+   ```
+
+   **ReactDOMServer** 可以将 React 元素渲染为初始 HTML 结点，`renderToString` 方法会返回一个 HTML 字符串。这一阶段中，React 会对 HTML 中需要绑定事件的结点进行一些标记。
+
+   还需要注意一点，对于这种同构的应用，在客户端渲染时需要用 ***hydrate*** 代替 ***render*** ：
+
+   ```jsx
+   ReactDOM.hydrate(<App />, document.getElementById('root'));
+   ```
+
+   `hydrate`方法不会完全在重新渲染整个页面了，并且它会为有特殊标记的结点绑定监听事件。
+
+   
+
+3. **将 HTML 结点字符串放入 HTML 模版中：**
+
+   ```javascript
+   data.replace('<div id="root"></div>', `<div id="root">${reactApp}</div>`)
+   ```
+
+   在上一步中，我们只是生成了页面的主要内容，但它并不是一个完成的 HTML，我们需要将这些内容填充到一个完成的 HTML 模版中。最初只包含 `<div id="root"></div>` 结点的 HTML 文件就可以作为模版文件。
+
+> [点击查看完整实例](https://alligator.io/react/server-side-rendering/)
+
+
+
+## 同构
+
+在服务端只需要渲染出页面最初的状态展示给用户，这时候页面不应该包括接口数据、用户状态（如登陆信息）、浏览器相关信息等。在明确了这一点之后，在同构过程中还需要注意以下几个问题：
+
+### 运行环境差异
+
+使用 Web API 的时候需要格外注意，因为它们在服务端无法使用。
+
+- HTML 文档对象（document、DOM）
+- 浏览器对象（window、navigator等）
+- 存储对象（localStorage、sessionStorage等）
+
+这些 Web API 需要避免在如下的组件生命周期中使用：
+
+- constructor
+- [getDerivedStateFromProps](https://reactjs.org/docs/react-component.html#static-getderivedstatefromprops)
+- [componentWillMount](https://reactjs.org/docs/react-component.html#unsafe_componentwillmount) (已废弃)
+
+![React 16 lifecircle](/Users/wangjing/Documents/资料/MK image/0_OoDfQ7pzAqg6yETH.jpeg)
+
+
+
+如果你一定要在这些生命周期中使用不同环境的 API，需要做好兼容性处理，但是这样做依然有很严重的负面作用。
+
+```jsx
+constructor(props) {
+  super(props)
+  this.state = {
+    data: typeof window !== 'undefined' ? 'client' : 'server'
+  }
+}
+render()
+  return <div>{this.state.data}</div>
+}
+```
+上面的看似没有问题，也不会得到报错。但是它会导致客户端与服务端渲染出来的内容不一致，在 `hydrate` 是会出现问题。这里只是文本不一致，如果是组件不一致那么会导致结点挂载错误、样式混乱，这个时候无论是客户端还是服务端都不会提示错误。
+
+```javascript
+index.js:2178 Warning: Text content did not match. Server: "server" Client: "client"
+```
+我们必须理解并且遵循 React 设计的原则，为了解决两种环境的差异，最好的办法是将这些 API 转移到服务端不会到达的生命周期中。
+
+```jsx
+constructor(props) {
+  super(props)
+  this.state = {
+    ssrDone: false
+  }
+}
+componentDidMount() {
+  this.setState({ ssrDone: true, online: navigator.onLine })
+}
+render() {
+  if(!this.state.ssrDone) {
+    return (
+      <div>loading...</div>
+    )
+  }
+  return <div>{this.state.online ? 'on' : 'off'}</div>
+}
+```
+
+> `useEffect` 会在 `componentDidMount` 和 `componentDidUpdate` 这两个生命周期中执行，因此 `useEffect` 中执行的内容不需要对服务端做特殊处理。
+
+### 路由
+
+大多数 React 应用都会涉及到路由问题，对于服务端渲染 **React Router** 提供了 `StaticRouter` 来代替客户端的 `BrowserRouter`。
+
+```jsx
+const html = ReactDOMServer.renderToString(
+	<StaticRouter location={req.url} context={context}>
+		<App />
+	</StaticRouter>
+);
+```
+
+其中 **location** 是请求的 URL 地址的字符串，它还可以是一个对象  `{ pathname, search, hash, state }`
+
+**context** 是组件与服务端沟通的桥梁。子组件可以通过 props 的 **staticContext** 字段获取、更改这个值。
+
+```jsx
+// 组件
+import React from 'react';
+
+export default ({ staticContext = {} }) => {
+  staticContext.status = 404;
+  return <h1>Oops, nothing here!</h1>;
+};
+```
+
+比如应用内没有匹配对应 URL 的时候会渲染 404 组件，可以在 **staticContext** 数据中进行标记。然后服务端就可以获取到这个信息，并进行处理。
+
+```javascript
+// 服务端
+if (context.status === 404) {
+  res.status(404);
+}
+```
+
+再比如在服务端需要先加载一些数据，再渲染组件的时候，组件内部也可以获取到服务端的数据：
+
+```jsx
+// 异步加载的数据
+const context = { data };
+
+const app = ReactDOMServer.renderToString(
+	<StaticRouter location={req.url} context={context}>
+		<App />
+	</StaticRouter>
+);
+```
+
+```jsx
+// 组件构造函数
+constructor(props) {
+  super(props);
+
+  // 在客户端 props 中没有 staticContext !!!
+  if (props.staticContext && props.staticContext.data) {
+    this.state = {
+      data: props.staticContext.data
+    };
+  } else {
+    this.state = {
+      data: []
+    };
+  }
+}
+```
+
+[更多用例](https://alligator.io/react/react-router-ssr/)
+
+### 数据
+
+一些配置数据需要从接口中获取，然后在渲染到页面上。在服务端，我们从接口中获取数据后，可以通过上面的 **staticContext** 或者直接放在 **props** 中。
+
+对于客户端来说这部分数据已经在服务端获取并渲染出来了，没必要再获取一遍。因此我们可以在服务端将这部分数据渲染到 HTML 中。
+
+```html
+<script>window.__PRELOADED_STATE__ = {...}</script>
+```
+
+在客户端我们直接从 `window.__PRELOADED_STATE__` 中获取数据就可以了
+
+```jsx
+const data = window.__PRELOADED_STATE__ && window.__PRELOADED_STATE__.pagedata
+
+ReactDOM.hydrate(
+  <Root data={data} />,
+  document.getElementById('root')
+)
+```
+
+
+
+---
+
+参考链接
+
+[The Benefits of Server Side Rendering Over Client Side Rendering](https://medium.com/walmartlabs/the-benefits-of-server-side-rendering-over-client-side-rendering-5d07ff2cefe8)
+
+[An Introduction to React Server-Side Rendering](https://alligator.io/react/server-side-rendering/)
+
+[Using React Router 4 with Server-Side Rendering](https://alligator.io/react/react-router-ssr/)
+
+[Why the Hell Would You Use Node.js](https://medium.com/the-node-js-collection/why-the-hell-would-you-use-node-js-4b053b94ab8e)
+

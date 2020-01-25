@@ -57,7 +57,7 @@ var app = new Vue({
 })
 ```
 
-上面是一个简单的例子。vue 通过设置 `el` 属性的值为 #app 绑定到了 html 中 id 为 app 的节点。而节点中 `{{}}` 里面的变量则与 vue 里的 message 属性是绑定的关系。当 vue 中的 message 发生变化的时候，html 页面中的变量也会跟着变化。这就是 vue 中的双向数据绑定的基本样例。
+上面是一个简单的例子。vue 通过设置 `el` 属性的值为 #app 绑定到了 html 中 id 为 app 的节点。而节点中 括号 里面的变量则与 vue 里的 message 属性是绑定的关系。当 vue 中的 message 发生变化的时候，html 页面中的变量也会跟着变化。这就是 vue 中的双向数据绑定的基本样例。
 
 ## 重要的属性
 
