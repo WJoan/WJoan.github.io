@@ -1,0 +1,630 @@
+---
+layout:     post
+title:      "SCSS 常用特性介绍"
+subtitle:   "嵌套、变量、@mixin、@function 以及 webpack 打包"
+date:       2019-12-25 20:27:08
+author:     "Joan"
+tags:		["css","scss"]
+---
+
+`scss` 是目前最成熟、最稳定、最强大的专业级CSS扩展语言，在我们的项目中经常会使用到它，除了大家最为熟悉的嵌套功能，`scss` 还有很多非常实用的特性。
+
+## CSS 拓展功能
+
+### 嵌套
+
+```scss
+#main p {
+  color: #00ff00;
+  width: 97%;
+
+  .redbox {
+    background-color: #ff0000;
+    color: #000000;
+  }
+}
+```
+
+编译为
+
+```css
+#main p {
+  color: #00ff00;
+  width: 97%; 
+}
+
+#main p .redbox {
+  background-color: #ff0000;
+  color: #000000; 
+}
+```
+
+### 父选择器 &
+
+用 `&` 代表嵌套规则外层的父选择器
+
+```scss
+a {
+  font-weight: bold;
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+  body.firefox & { font-weight: normal; }
+}
+```
+
+编译为
+
+```css
+a {
+  font-weight: bold;
+  text-decoration: none; 
+}
+a:hover {
+  text-decoration: underline; 
+}
+body.firefox a {
+  font-weight: normal;
+}
+```
+
+### 属性嵌套
+
+（注意冒号）
+
+```scss
+.funky {
+  font: {
+    family: fantasy;
+    size: 30em;
+    weight: bold;
+  }
+}
+```
+
+编译为
+
+```css
+.funky {
+  font-family: fantasy;
+  font-size: 30em;
+  font-weight: bold; 
+}
+```
+
+
+
+## 语法
+
+### 变量
+
+变量以美元符号开头，赋值方法与 CSS 属性的写法一样
+
+```scss
+$width: 5em;
+
+#main {
+  width: $width;
+}
+```
+
+变量支持块级作用域，嵌套规则内定义的变量只能在嵌套规则内使用（局部变量），不在嵌套规则内定义的变量则可在任何地方使用（全局变量）。将局部变量转换为全局变量可以添加 `!global` 声明：
+
+```scss
+#main {
+  $width: 5em !global;
+  width: $width;
+}
+
+#sidebar {
+  width: $width;
+}
+```
+
+编译为
+
+```css
+#main {
+  width: 5em;
+}
+
+#sidebar {
+  width: 5em;
+}
+```
+
+### 数据类型
+
+- 数字，`1, 2, 13, 10px`
+- 字符串，有引号字符串与无引号字符串，`"foo", 'bar', baz`
+- 颜色，`blue, #04a3f9, rgba(255,0,0,0.5)`
+- 布尔型，`true, false`
+- 空值，`null`
+- 数组 (list)，用空格或逗号作分隔符，`1.5em 1em 0 2em, Helvetica, Arial, sans-serif`
+- maps, 相当于 JavaScript 的 object，`(key1: value1, key2: value2)`
+
+```scss
+// list
+$font-stack: ('Helvetica', 'Arial', sans-serif);
+
+$font-stack: (
+  'Helvetica',
+  'Arial',
+  sans-serif,
+);
+
+// map
+$breakpoints: (
+  'small': 767px,
+  'medium': 992px,
+  'large': 1200px,
+);
+```
+
+### 插值语句
+
+通过 `#{}` 插值语句可以在选择器或属性名中使用变量：
+
+```scss
+$name: foo;
+$attr: border;
+p.#{$name} {
+  #{$attr}-color: blue;
+}
+```
+
+编译为
+
+```css
+p.foo {
+  border-color: blue; 
+}
+```
+
+### !default
+
+如果分配给变量的值后面添加了`!default`标志 ，这意味着该变量如果已经赋值，那么它不会被重新赋值，但是，如果它尚未赋值，那么它会被赋予新的给定值。
+
+方便其他开发者重写变量。
+
+```scss
+// Developer’s own variable
+$baseline: 2em;
+
+// Your library declaring `$baseline`
+@import 'your-library';
+
+// $baseline == 2em;
+```
+
+
+
+## 指令
+
+### @import
+
+大多数情况下，一般在文件的最外层（不在嵌套规则内）使用 `@import`，其实，也可以将 `@import` 嵌套进 CSS 样式或者 `@media` 中，与平时的用法效果相同，只是这样导入的样式只能出现在嵌套的层中。
+
+```scss
+// example.scss
+.example {
+  color: red;
+}
+
+// main.scss
+#main {
+  @import "example";
+}
+```
+
+编译为
+
+```css
+#main .example {
+  color: red;
+}
+```
+
+### @media
+
+Sass 中 `@media` 指令与 CSS 中用法一样，只是增加了一点额外的功能：允许其在 CSS 规则中嵌套。`@media` 将被编译到文件的最外层，包含嵌套的父选择器。
+
+```scss
+.sidebar {
+  width: 300px;
+  @media screen and (orientation: landscape) {
+    width: 500px;
+  }
+}
+```
+
+编译为
+
+```css
+.sidebar {
+  width: 300px; 
+}
+
+@media screen and (orientation: landscape) {
+  .sidebar {
+    width: 500px; 
+  } 
+}
+```
+
+`@media` 甚至可以使用 SassScript（比如变量，函数，以及运算符）代替条件的名称或者值：
+
+```scss
+$media: screen;
+$feature: -webkit-min-device-pixel-ratio;
+$value: 1.5;
+
+@media #{$media} and ($feature: $value) {
+  .sidebar {
+    width: 500px;
+  }
+}
+```
+
+编译为
+
+```css
+@media screen and (-webkit-min-device-pixel-ratio: 1.5) {
+	.sidebar {
+		width: 500px; 
+	} 
+}
+```
+
+### @extend
+
+将一个选择器下的所有样式继承给另一个选择器
+
+```scss
+.error {
+  border: 1px #f00;
+  background-color: #fdd;
+}
+.error.intrusion {
+  background-image: url("/image/hacked.png");
+}
+.seriousError {
+  @extend .error;
+  border-width: 3px;
+}
+```
+
+编译为
+
+```css
+.error, .seriousError {
+  border: 1px #f00;
+  background-color: #fdd; }
+
+.error.intrusion, .seriousError.intrusion {
+  background-image: url("/image/hacked.png"); }
+
+.seriousError {
+  border-width: 3px; }
+```
+
+有时，需要定义一套样式并不是给某个元素用，而是只通过 `@extend` 指令使用。如果使用普通的 CSS 规则，最后会编译出很多用不到的样式，也容易与其他样式名冲突，所以，Sass 引入了“占位符选择器” (placeholder selectors)，看起来很像普通的 `id` 或 `class` 选择器，只是 `#` 或 `.` 被替换成了 `%`。可以像 class 或者 id 选择器那样使用，当它们单独使用时，不会被编译到 CSS 文件中。
+
+```scss
+// This ruleset won't be rendered on its own.
+#context a%extreme {
+  color: blue;
+  font-weight: bold;
+  font-size: 2em;
+}
+
+// How to use
+.notice {
+  @extend %extreme;
+}
+```
+
+编译为
+
+```css
+#context a.notice {
+  color: blue;
+  font-weight: bold;
+  font-size: 2em; }
+```
+
+### @debug / @warn / @error
+
+@debug 主要用于调试 scss；@warn 可以输出一些提示信息给用户；@error 会中断编译器工作
+
+```scss
+@debug 10em + 12em;
+// Line 1 DEBUG: 22em
+
+@mixin adjust-location($x, $y) {
+  @if unitless($x) {
+    @warn "Assuming #{$x} to be in pixels";
+    $x: 1px * $x;
+  }
+  @if unitless($y) {
+    @warn "Assuming #{$y} to be in pixels";
+    $y: 1px * $y;
+  }
+  position: relative; left: $x; top: $y;
+}
+
+```
+
+### @if / @else if / @while / @for / @each
+
+```scss
+// @if @else if
+$type: monster;
+p {
+  @if $type == ocean {
+    color: blue;
+  } @else if $type == matador {
+    color: red;
+  } @else if $type == monster {
+    color: green;
+  } @else {
+    color: black;
+  }
+}
+
+// while
+$i: 6;
+@while $i > 0 {
+  .item-#{$i} { width: 2em * $i; }
+  $i: $i - 2;
+}
+
+// for
+@for $i from 1 through 3 {
+  .item-#{$i} { width: 2em * $i; }
+}
+
+// each
+@each $animal, $color, $cursor in (puma, black, default),
+                                  (sea-slug, blue, pointer),
+                                  (egret, white, move) {
+  .#{$animal}-icon {
+    background-image: url('/images/#{$animal}.png');
+    border: 2px solid $color;
+    cursor: $cursor;
+  }
+}
+```
+
+### 混合指令
+
+混合指令（Mixin）用于定义可重复使用的样式。定义 `@mixin` ； 引用 `@include`
+
+带参数
+
+```scss
+@mixin sexy-border($color, $width: 1in) {
+  border: {
+    color: $color;
+    width: $width;
+    style: dashed;
+  }
+}
+p { @include sexy-border(blue, 1in); }
+```
+
+不确定使用参数
+
+```scss
+@mixin box-shadow($shadows...) {
+  -moz-box-shadow: $shadows;
+  -webkit-box-shadow: $shadows;
+  box-shadow: $shadows;
+}
+.shadows {
+  @include box-shadow(0px 4px 5px #666, 2px 6px 10px #999);
+}
+```
+
+向混合样式中导入内容
+
+```scss
+@mixin apply-to-ie6-only {
+  * html {
+    @content;
+  }
+}
+@include apply-to-ie6-only {
+  #logo {
+    background-image: url(/logo.gif);
+  }
+}
+```
+
+编译为
+
+```
+* html #logo {
+  background-image: url(/logo.gif);
+}
+```
+
+### 函数指令
+
+Sass 支持自定义函数，这个是我们目前应用中使用最多的一个函数。
+
+```scss
+@function v($px) {
+  @return round($px * 10000 / 1080) / 10000 * 100vw;
+}
+```
+
+
+
+## 2048小游戏应用
+
+在 SCSS 中嵌套、变量、@mixin以及@function 是帮助我们提升CSS编程效率的利器。
+
+### 循环语句
+
+循环语句可以帮助我们根据配置的不同，生成不同数量不用内容的样式，大大减少了需求变更后代码的更改亮。对于传统的多列布局，循环语句的功能更加凸显。
+
+```scss
+$grid-row-cells: 4;
+
+@for $x from 1 through $grid-row-cells {
+  @for $y from 1 through $grid-row-cells {
+    &.tile-position-#{$x}-#{$y} {
+      $xPos: ($tile-size + $grid-spacing) * ($x - 1);
+      $yPos: ($tile-size + $grid-spacing) * ($y - 1);
+      @include transform(translate($xPos, $yPos));
+      z-index: $y - $x + 10;
+  	}
+	}
+}
+```
+
+### 媒体查询
+
+虽然现在媒体查询应用不多，大多数页面PC、H5端分别承载了不同的功能，但媒体查询有的时候还有很有帮助的。在 SASS 的应用中，媒体查询占了很大比例。通常先定义一些客户端尺寸分割点，然后编写一个媒体查询管理器，自动生成媒体查询相关代码。这样在写 CSS 的过程中可以将注意力集中在样式的编写上，而不是各种媒体查询的语句。
+
+```scss
+// Media queries
+@mixin smaller($width) {
+  @media screen and (max-width: $width) {
+    @content;
+  }
+}
+
+
+$mobile-threshold: 56vw;
+@include smaller($mobile-threshold) {
+  // style
+}
+```
+
+### 浏览器前缀
+
+```scss
+@mixin transform($args...) {
+  -webkit-transform: $args;
+  -moz-transform: $args;
+  -ms-transform: $args;
+  transform: $args;
+}
+```
+
+
+
+## Webpack 打包
+
+### sass-loader
+
+在入口内容前增加变量，当Sass变量取决于环境时很有用：
+
+```javascript
+{
+  loader: "sass-loader",
+  options: {
+    prependData: '$env: ' + process.env.NODE_ENV + ';',
+  }
+}
+ 
+// 7.2.0 之后支持函数
+{
+  loader: "sass-loader",
+  options: {
+    prependData: (loaderContext) => {
+ 			// More information about available properties https://webpack.js.org/api/loaders/
+			const { resourcePath, rootContext } = loaderContext;
+      const relativePath = path.relative(rootContext, resourcePath);
+
+      if (relativePath === 'styles/foo.scss') {
+        return '$value: 100px;';
+      }
+
+      return '$value: 200px;';
+    }
+  }
+}
+```
+
+### sass-resources-loader
+
+在每一个 SASS 模块中引用 SASS 资源，例如我们定义的公共变量 & 函数：
+
+```javascript
+{
+  loader: 'sass-resources-loader',
+  options: {
+    resources: PLATFORM_NAME === 'pc'
+      ? resolve('src/common/styles/pc/variables.scss')
+      : resolve('src/common/styles/m/variables_m.scss')
+  }
+}
+```
+
+
+
+## 样式组织结构
+
+ ```
+sass/
+|
+|– abstracts/
+|   |– _variables.scss    # Sass Variables
+|   |– _functions.scss    # Sass Functions
+|   |– _mixins.scss       # Sass Mixins
+|   |– _placeholders.scss # Sass Placeholders
+|
+|– base/
+|   |– _reset.scss        # Reset/normalize
+|   |– _typography.scss   # Typography rules
+|   …                     # Etc.
+|
+|– components/
+|   |– _buttons.scss      # Buttons
+|   |– _carousel.scss     # Carousel
+|   |– _cover.scss        # Cover
+|   |– _dropdown.scss     # Dropdown
+|   …                     # Etc.
+|
+|– layout/
+|   |– _navigation.scss   # Navigation
+|   |– _grid.scss         # Grid system
+|   |– _header.scss       # Header
+|   |– _footer.scss       # Footer
+|   |– _sidebar.scss      # Sidebar
+|   |– _forms.scss        # Forms
+|   …                     # Etc.
+|
+|– pages/
+|   |– _home.scss         # Home specific styles
+|   |– _contact.scss      # Contact specific styles
+|   …                     # Etc.
+|
+|– themes/
+|   |– _theme.scss        # Default theme
+|   |– _admin.scss        # Admin theme
+|   …                     # Etc.
+|
+|– vendors/
+|   |– _bootstrap.scss    # Bootstrap
+|   |– _jquery-ui.scss    # jQuery UI
+|   …                     # Etc.
+|
+`– main.scss              # Main Sass file
+ ```
+
+
+
+## 思考与总结
+
+随着前端的发展 H5 与 PC 应用功能逐渐割裂，flex 和 grid 的出现使得样式布局越来越简化，webpack + postCss 可以让我们提前使用到更多的原生 CSS 语法。未来 CSS 预处理器可能会成为 CSS 发展历史上的过渡产物，但目前为止 SASS、LESS 依然广泛应用在各个前端团队，并且 @mixin、@function 等功能仍然会以另一种语法形式再度回到我们面前。无论使用何种技术、何种框架，我们的目的都是尽可能的消除重复 & 低效的代码。
+
+
+
+## 参考链接
+
+[Sass Guidelines](https://sass-guidelin.es/zh/#section)
+
+[Sass 指南](https://sass.bootcss.com/guide)

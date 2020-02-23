@@ -8,3 +8,19 @@ This personal blog is build based on Jekyll Theme 'Clean Blog'. This theme is si
 ### [View Particle Theme &rarr;](https://github.com/nrandecker/particle)
 
 ### [View particles.js &rarr;](https://github.com/VincentGarreau/particles.js)
+
+# Use Jekyll
+
+```
+  gem install jekyll bundler
+
+  jekyll new my-awesome-site
+
+  cd my-awesome-site
+
+  bundle install
+
+  bundle exec jekyll serve
+```
+
+### => 打开浏览器 http://localhost:4000
