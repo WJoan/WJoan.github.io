@@ -1,0 +1,624 @@
+---
+layout:     post
+title:      "Canvas使用总结"
+date:       2020-04-24 08:23
+author:     "Joan"
+tags:		    ["canvas"]
+---
+
+
+
+[TOC]
+
+#  Canvas 基本用法
+
+
+
+## Canvas 元素
+
+### 1、宽高
+
+```html
+<canvas id="tutorial" width="150" height="150"></canvas>
+```
+
+实际上，`canvas`标签只有两个属性**——** `width`和`height`。当没有设置宽度和高度的时候，canvas会初始化宽度为300像素和高度为150像素。该元素可以使用[CSS](https://developer.mozilla.org/en-US/docs/Glossary/CSS)来定义大小，但在绘制时图像会伸缩以适应它的框架尺寸：如果CSS的尺寸与初始画布的比例不一致，它会出现扭曲。
+
+**注意:** 如果你绘制出来的图像是扭曲的, 尝试用width和height属性为`<canvas>`明确规定宽高，而不是使用CSS。
+
+### 2、栅格（Grid）
+
+通常来说网格中的一个单元相当于canvas元素中的一像素。栅格的起点为左上角（坐标为（0,0））。所有元素的位置都相对于原点定位。原点可以通过某些方法移动，整个坐标系也可以旋转和翻转。
+
+<img src="/Users/wangjing/Documents/资料/MK image/Canvas_default_grid.png" alt="Canvas_default_grid"  />
+
+### 3、基本形状与颜色
+
+不同于 SVG 只支持两种形式的图形绘制：矩形和路径（由一系列点连成的线段）。
+
+#### 矩形
+
+- `fillRect(x, y, width, height)`
+
+  绘制一个填充的矩形
+
+- `strokeRect(x, y, width, height)`
+
+  绘制一个矩形的边框
+
+- `clearRect(x, y, width, height)`
+
+  清除指定矩形区域，让清除部分完全透明。
+
+上面提供的方法之中每一个都包含了相同的参数。**x与y指定了在canvas画布上所绘制的矩形的左上角**（相对于原点）的坐标。width和height设置矩形的尺寸。
+
+#### 路径
+
+- `beginPath()`
+
+新建一条路径，生成之后，图形绘制命令被指向到路径上生成路径。
+
+- `moveTo(x, y)`
+
+将笔触移动到指定的坐标x以及y上。
+
+- `closePath()`
+
+闭合路径之后图形绘制命令又重新指向到上下文中。
+
+- `stroke()`
+
+通过线条来绘制图形轮廓。
+
+- `fill()`
+
+通过填充路径的内容区域生成实心的图形。
+
+- `lineTo(x, y)`
+
+线
+
+- `arc(x, y, radius, startAngle, endAngle, anticlockwise)`
+
+圆弧
+
+- `quadraticCurveTo(cp1x, cp1y, x, y)`
+
+贝塞尔曲线
+
+- `rect(x, y, width, height)`
+
+矩形
+
+
+
+#### Path2D 
+
+[`Path2D`](https://developer.mozilla.org/zh-CN/docs/Web/API/Path2D)对象已可以在较新版本的浏览器中使用，用来缓存或记录绘画命令，这样你将能快速地回顾路径。（⚠️可能有兼容性问题，IE不支持，IOS8之前不支持）
+
+```javascript
+function draw() {
+  var canvas = document.getElementById('canvas');
+  if (canvas.getContext){
+    var ctx = canvas.getContext('2d');
+
+    var rectangle = new Path2D();
+    rectangle.rect(10, 10, 50, 50);
+
+    var circle = new Path2D();
+    circle.moveTo(125, 35);
+    circle.arc(100, 35, 25, 0, 2 * Math.PI);
+
+    ctx.stroke(rectangle);
+    ctx.fill(circle);
+  }
+}
+```
+
+新的Path2D API有另一个强大的特点，就是使用SVG path data来初始化canvas上的路径。这将使你获取路径时可以以SVG或canvas的方式来重用它们。
+
+```javascript
+var p = new Path2D("M10 10 h 80 v 80 h -80 Z");
+```
+
+
+
+## 使用图片
+
+```typescript
+void ctx.drawImage(image, dx, dy); // 绘制原图
+void ctx.drawImage(image, dx, dy, dWidth, dHeight); // 绘制缩放图
+void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight); // 绘制剪裁缩放图
+```
+
+![](/Users/wangjing/Documents/资料/MK image/Canvas_drawimage.jpg)
+
+⚠️ 图片加载成功后再进行绘制
+
+⚠️ `drawImage` 参数数量不一样代表的意义不同
+
+### 绘制来源
+
+`HTMLImageElement`
+
+`HTMLVideoElement`
+
+`HTMLCanvasElement`
+
+`ImageBitmap`（兼容性）
+
+### 跨域
+
+在 `HTMLImageElement`属性，你可以请求加载其它域名上的图片。如果图片的服务器允许跨域访问这个图片，那么你可以使用这个图片而不污染canvas，否则，使用这个图片将会[污染canvas](https://developer.mozilla.org/zh-CN/docs/CORS_Enabled_Image#.E4.BB.80.E4.B9.88.E6.98.AF.22.E8.A2.AB.E6.B1.A1.E6.9F.93.22.E7.9A.84canvas)。
+
+### 缩放
+
+在绘制图像的时候，控制图像的宽高可以达到缩放图片的效果，但是对于放大图片的行为来说很肯能导致图片变得模糊，特别是图片中有文字的时候。
+
+另外 Gecko 1.9.2 引入了 `mozImageSmoothingEnabled` 属性，值为 `false `时，图像不会平滑地缩放。默认是 `true` 。平滑缩放会在会自动修复有锯齿边缘，使得边缘能够平滑过渡，但这样处理有时候会让图片显得有些模糊。
+
+```js
+cx.mozImageSmoothingEnabled = false;
+```
+
+
+
+## 变形
+
+###状态的保存和恢复
+
+Canvas 的状态就是当前画面应用的所有样式和变形的一个快照。一个绘画状态包括：
+
+1. 当前应用的变形（即移动，旋转和缩放）
+
+2. 以及下面这些属性：[`strokeStyle`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/strokeStyle), [`fillStyle`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/fillStyle), [`globalAlpha`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/globalAlpha), [`lineWidth`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/lineWidth), [`lineCap`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/lineCap), [`lineJoin`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/lineJoin), [`miterLimit`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/miterLimit), [`lineDashOffset`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/lineDashOffset), [`shadowOffsetX`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/shadowOffsetX), [`shadowOffsetY`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/shadowOffsetY), [`shadowBlur`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/shadowBlur), [`shadowColor`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/shadowColor), [`globalCompositeOperation`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation), [`font`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/font), [`textAlign`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/textAlign), [`textBaseline`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/textBaseline), [`direction`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/direction), [`imageSmoothingEnabled`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/imageSmoothingEnabled)
+
+3. 当前的[裁切路径（clipping path）](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API/Tutorial/Compositing#Clipping_paths)
+
+
+
+- `save()`
+
+当前的状态就被推送到栈中保存。
+
+- `restore()`
+
+恢复 canvas 状态。你可以调用任意多次 `save`方法。每一次调用 `restore` 方法，上一个保存的状态就从栈中弹出，所有设定都恢复。在做变形之前先保存状态是一个良好的习惯。大多数情况下，调用 restore 方法比手动恢复原先的状态要简单得多。如果你是在一个循环中做位移但没有保存和恢复 canvas 的状态，很可能到最后会发现怎么有些东西不见了，那是因为它很可能已经超出 canvas 范围以外了。
+
+
+
+### 移动
+
+- `translate(x, y)`
+
+`translate `方法接受两个参数。x 是左右偏移量，y 是上下偏移量。
+
+![](/Users/wangjing/Documents/资料/MK image/Canvas_grid_translate.png)
+
+
+
+### 旋转
+
+- `rotate(angle)`
+
+这个方法只接受一个参数：旋转的角度(angle)，它是顺时针方向的，以弧度为单位的值。
+
+![](/Users/wangjing/Documents/资料/MK image/Canvas_grid_rotate.png)
+
+### 缩放
+
+- `scale(x, y)`
+
+默认情况下，**canvas 的 1 个单位为 1 个像素**。举例说，如果我们设置缩放因子是 0.5，1 个单位就变成对应 0.5 个像素，这样绘制出来的形状就会是原先的一半。同理，设置为 2.0 时，1 个单位就对应变成了 2 像素，绘制的结果就是图形放大了 2 倍。
+
+如果参数为负实数， 相当于以x 或 y轴作为对称轴镜像反转（例如， 使用`translate(0,canvas.height); scale(1,-1);` 以y轴作为对称轴镜像反转， 就可得到著名的笛卡尔坐标系，左下角为原点）。
+
+
+
+## 合成与裁剪
+
+[`globalCompositeOperation = type`](https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation)
+
+这个属性设定了在画新图形时采用的遮盖策略，其值是一个标识12种遮盖方式的字符串。
+
+- source-over
+
+![Canvas_source-over](/Users/wangjing/Documents/资料/MK image/Canvas_source-over.png)
+
+
+
+## ImageData
+
+[`ImageData`](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageData)对象中存储着canvas对象真实的像素数据，它包含以下几个只读属性：
+
+- **`width`**
+
+  图片宽度，单位是像素
+
+- `height`
+
+  图片高度，单位是像素
+
+- `data`
+
+  [`Uint8ClampedArray`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray)类型的一维数组，包含着RGBA格式的整型数据，范围在0至255之间（包括255）。**`Uint8ClampedArray`（8位无符号整型固定数组）** 类型化数组表示一个由值固定在0-255区间的8位无符号整型组成的数组。
+
+![https://www.kkkk1000.com/images/getImgData/getImgDatadata.jpg](/Users/wangjing/Documents/资料/MK image/getImgDatadata.jpg)
+
+- 得到场景像素数据
+
+```js
+var myImageData = ctx.getImageData(left, top, width, height);
+```
+
+- 写入像素数据
+
+```js
+ctx.putImageData(myImageData, dx, dy);
+```
+
+---
+
+
+
+# 实际问题
+
+## Canvas的宽高
+
+```html
+<canvas id="tutorial" width="300" height="150"></canvas>
+```
+
+当没有设置宽度和高度的时候，canvas会初始化宽度为300像素和高度为150像素。这两个属性代表了 Canvas 元素内部的尺寸大小，用于绘制图形时确定大小和位置。而CSS定义了 Canvas 展示的大小。
+
+⚠️这两组值可以不一样，但比例需要保持一致，不然最终显示的图像会产生形变。
+
+<p class="codepen" data-height="265" data-theme-id="light" data-default-tab="js,result" data-user="WJoan" data-slug-hash="bGVwEMR" style="height: 265px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="[canvas] 宽高">
+  <span>See the Pen <a href="https://codepen.io/WJoan/pen/bGVwEMR">
+  [canvas] 宽高</a> by Joan (<a href="https://codepen.io/WJoan">@WJoan</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+
+##Canvas坐标系
+
+<img src="/Users/wangjing/Documents/资料/MK image/Canvas_default_grid.png" alt="Canvas_default_grid"  />
+
+
+
+- 转换成笛卡尔坐标系：
+
+```javascript
+translate(0,canvas.height);
+scale(1,-1);
+```
+
+⚠️需要注意：在这种情况下绘制的文字和图片会上下翻转
+
+
+
+## 被污染的画布
+
+由于在 `canvas` 位图中的像素可能来自多种来源，包括从其他主机检索的图像或视频，因此不可避免的会出现安全问题。
+
+尽管不通过 CORS 就可以在 `canvas` 中使用其他来源的图片，但是这会**污染**画布，并且不再认为是安全的画布，这将可能在 `canvas` 检索数据过程中引发异常。
+
+如果从外部引入的 HTML `img`或 SVG  ，并且图像源不符合规则，将会被阻止从 `canvas` 中读取数据。
+
+在"被污染"的画布中调用以下方法将会抛出安全错误：
+
+- 在 `canvas` 的上下文上调用`getImageData()`
+- 在 `canvas` 上调用 `toBlob()`
+- 在 `canvas` 上调用  `toDataURL()`
+
+这种机制可以避免未经许可拉取远程网站信息而导致的用户隐私泄露。
+
+
+
+![canvas_tainted](/Users/wangjing/Documents/资料/MK image/canvas_tainted.png)
+
+**CORS**
+
+在跨域的图片里设置 `crossOrigin="anonymous"`  。在HTML5中，有些元素提供了支持CORS(Cross-Origin Resource Sharing)（跨域资源共享）的属性，这些元素包括`img`，`video`，`script`等，而提供的属性名就是`crossOrigin`属性。
+
+⚠️ CORS 需要后端支持
+
+⚠️ 加上这个属性之后如果请求还跨域，可以检测一下请求头部有没有 `origin` 属性，如果没有可能时由于缓存问题，可以给`imageUrl`尾部加上随机数。
+
+![simple_req](/Users/wangjing/Documents/资料/MK image/simple_req.png)
+
+
+
+
+
+##高清屏 Canvas 绘制模糊问题
+
+https://www.html5rocks.com/en/tutorials/canvas/hidpi/
+
+Canvas 模糊问题实际上和我们熟悉的 **1px 问题** 是一样的，都是由于高清屏物理像素与css定义的px不一致导致的。
+
+![Canvas_hidpi](/Users/wangjing/Documents/资料/MK image/Canvas_hidpi.png)
+
+- window.devicePixelRatio
+
+此属性返回当前显示设备的物理像素分辨率与CSS像素分辨率的比值。该值也可以被解释为像素大小的比例：即一个CSS像素的大小相对于一个物理像素的大小的比值。
+
+```javascript
+function setupCanvas(canvas) {
+  // Get the device pixel ratio, falling back to 1.
+  var dpr = window.devicePixelRatio || 1;
+  // Get the size of the canvas in CSS pixels.
+  var rect = canvas.getBoundingClientRect();
+  // Give the canvas pixel dimensions of their CSS
+  // size * the device pixel ratio.
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  var ctx = canvas.getContext('2d');
+  // Scale all drawing operations by the dpr, so you
+  // don't have to worry about the difference.
+  ctx.scale(dpr, dpr);
+  return ctx;
+}
+```
+
+<p class="codepen" data-height="265" data-theme-id="light" data-default-tab="js,result" data-user="WJoan" data-slug-hash="XWmjXEy" style="height: 265px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="[canvas] 高清屏模糊">
+  <span>See the Pen <a href="https://codepen.io/WJoan/pen/XWmjXEy">
+  [canvas] 高清屏模糊</a> by Joan (<a href="https://codepen.io/WJoan">@WJoan</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+
+## 用户交互
+
+- 获取用户点击位置
+
+**`Element.getBoundingClientRect()`** 方法返回元素的大小及其相对于视口的位置。
+
+**`MouseEvent.clientX`** 是只读属性，它提供事件发生时的应用客户端区域的水平坐标 (与页面坐标不同)。例如，不论页面是否有水平滚动，当你点击客户端区域的左上角时，鼠标事件的 `clientX` 值都将为 0 。
+
+```javascript
+function getCursorPosition(canvas, event) {
+    const rect = canvas.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+    console.log("x: " + x + " y: " + y)
+}
+
+const canvas = document.querySelector('canvas')
+canvas.addEventListener('mousedown', function(e) {
+    getCursorPosition(canvas, e)
+})
+```
+
+- 对于复杂路径
+
+`CanvasRenderingContext2D.isPointInPath()`是 Canvas 2D API 用于判断在当前路径中是否包含检测点的方法。
+
+```c++
+boolean ctx.isPointInPath(x, y);
+boolean ctx.isPointInPath(x, y, fillRule);
+
+boolean ctx.isPointInPath(path, x, y);
+boolean ctx.isPointInPath(path, x, y, fillRule);
+```
+
+- 对于图片、简单图形
+
+```js
+var isInside=(
+    mouseX>=RectX && 
+    mouseX<=RectX+RectWidth &&
+    mouseY>=RectY &&
+    mouseY<=RectY+RectHeight
+);
+```
+
+<p class="codepen" data-height="265" data-theme-id="light" data-default-tab="js,result" data-user="WJoan" data-slug-hash="BaoLKRx" style="height: 265px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="[canvas]获取鼠标位置">
+  <span>See the Pen <a href="https://codepen.io/WJoan/pen/BaoLKRx">
+  [canvas]获取鼠标位置</a> by Joan (<a href="https://codepen.io/WJoan">@WJoan</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+
+##碰撞检测
+
+https://aotu.io/notes/2017/02/16/2d-collision-detection/index.html
+
+在 2D 环境下，常见的碰撞检测方法如下：
+
+- 外接图形判别法
+
+  - 轴对称包围盒（Axis-Aligned Bounding Box），即无旋转矩形。
+
+  ![rectangle_collision](/Users/wangjing/Documents/资料/MK image/rectangle_collision.png)
+
+  - 圆形碰撞
+
+  ![circle_collision](/Users/wangjing/Documents/资料/MK image/circle_collision.png)
+
+  - 圆形与矩形（无旋转）
+
+  ![cicle_rectangle_left](/Users/wangjing/Documents/资料/MK image/cicle_rectangle_left.png)
+
+  - 圆形与旋转矩形（以矩形中心点为旋转轴）⚠️
+
+  ![circle_and_rotated_rect](/Users/wangjing/Documents/资料/MK image/circle_and_rotated_rect.png)
+
+- 光线投射法
+
+- 分离轴定理
+
+- 其他
+
+  - 地图格子划分
+
+  ![map_cell_collision](/Users/wangjing/Documents/资料/MK image/map_cell_collision.png)
+
+  - 像素检测
+
+  ![pixel_collision](/Users/wangjing/Documents/资料/MK image/pixel_collision.png)
+
+各种碰撞检测方法难易度：外接图形判别法 > 其他 > 光线投射法 > 分离轴定理
+
+
+
+##html2canvas
+
+| Name                   | Default                   | Description                                                  |
+| ---------------------- | ------------------------- | ------------------------------------------------------------ |
+| allowTaint             | `false`                   | Whether to allow cross-origin images to taint the canvas     |
+| backgroundColor        | `#ffffff`                 | Canvas background color, if none is specified in DOM. Set `null` for transparent |
+| canvas                 | `null`                    | Existing `canvas` element to use as a base for drawing on    |
+| foreignObjectRendering | `false`                   | Whether to use ForeignObject rendering if the browser supports it |
+| imageTimeout           | `15000`                   | Timeout for loading an image (in milliseconds). Set to `0` to disable timeout. |
+| ignoreElements         | `(element) => false`      | Predicate function which removes the matching elements from the render. |
+| logging                | `true`                    | Enable logging for debug purposes                            |
+| onclone                | `null`                    | Callback function which is called when the Document has been cloned for rendering, can be used to modify the contents that will be rendered without affecting the original source document. |
+| proxy                  | `null`                    | Url to the [proxy](https://github.com/niklasvh/html2canvas/blob/master/proxy) which is to be used for loading cross-origin images. If left empty, cross-origin images won't be loaded. |
+| removeContainer        | `true`                    | Whether to cleanup the cloned DOM elements html2canvas creates temporarily |
+| scale                  | `window.devicePixelRatio` | The scale to use for rendering. Defaults to the browsers device pixel ratio. |
+| useCORS                | `false`                   | Whether to attempt to load images from a server using CORS   |
+| width                  | `Element` width           | The width of the `canvas`                                    |
+| height                 | `Element` height          | The height of the `canvas`                                   |
+| x                      | `Element` x-offset        | Crop canvas x-coordinate                                     |
+| y                      | `Element` y-offset        | Crop canvas y-coordinate                                     |
+| scrollX                | `Element` scrollX         | The x-scroll position to used when rendering element, (for example if the Element uses `position: fixed`) |
+| scrollY                | `Element` scrollY         | The y-scroll position to used when rendering element, (for example if the Element uses `position: fixed`) |
+| windowWidth            | `Window.innerWidth`       | Window width to use when rendering `Element`, which may affect things like Media queries |
+| windowHeight           | `Window.innerHeight`      | Window height to use when rendering `Element`, which may affect things like Media queries |
+
+- 跨域问题
+
+1. `allowTaint: true` 和 `useCORS: true` 都是解决跨域问题的方式，不同的是使用`allowTaint` 会对canvas造成污染，导致无法使用`canvas.toDataURL` 方法，所以这里不能使用`allowTaint: true`
+
+- 保存一张与html不同的图
+
+1. 使用 `onclone` 字段（一个函数），可以在原基础之上修改，但不影响原始内容
+2. 定义一个看不见 dom，并绘制里面的内容
+
+
+
+#Canvas 性能最佳实践
+
+https://www.html5rocks.com/en/tutorials/canvas/performance/#toc-ref
+
+https://smus.com/canvas-vs-svg-performance/
+
+##减少改变 context 属性
+
+改变 context 的属性并非是完全无代价的。我们可以通过适当地安排调用绘图 API 的顺序，降低 context 状态改变的频率。
+
+##分层 Canvas
+
+分层 Canvas 的出发点是，动画中的每种元素（层），对渲染和动画的要求是不一样的。对很多游戏而言，主要角色变化的频率和幅度是很大的（他们通常都是走来走去，打打杀杀的），而背景变化的频率或幅度则相对较小（基本不变，或者缓慢变化，或者仅在某些时机变化）。很明显，我们需要很频繁地更新和重绘人物，但是对于背景，我们也许只需要绘制一次，也许只需要每隔 200ms 才重绘一次，绝对没有必要每 16ms 就重绘一次。
+
+##离屏 Canvas
+
+`drawImage` 这个方法不仅可以绘制图片也可以绘制 canvas，他们的开销几乎一样。我们可以将某些图片或者形状提前画在一个不展示在页面上的 canvas 中，然后在渲染每一帧的时候绘制这个离屏 canvas。`drawImage` 虽然自带剪裁功能，但是开销相对较大，因此将不用大小的图片绘制在离屏 canvas 上可以有效提高性能；另一种情况就是某个元素由多个图片组成，使用离屏 canvas 可以将多次`drawImage` 减少为一次。
+
+##过滤画布外的对象
+
+有时候，Canvas 只是游戏世界的一个「窗口」，如果我们在每一帧中，都把整个世界全部画出来，势必就会有很多东西画到 Canvas 外面去了，同样调用了绘制 API，但是并没有任何效果。因此我们可以考虑去除画布显示之外的对象的绘制，提升性能。但有些时候判断一个对象是否在视口中比较复杂，也会占据一定计算量，这个时候需要权衡是否进行处理。
+
+##避免阻塞
+
+使用 **Web Worker**，在另一个线程里进行复杂度较高的计算
+
+##性能测试与记录
+
+https://github.com/mrdoob/stats.js/
+
+- **FPS** 帧率
+- **MS** 绘制一帧需要的毫秒数
+- **MB** 内存大小
+- **CUSTOM** 用户自定义
+
+```javascript
+var stats = new Stats();
+stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild( stats.dom );
+
+function animate() {
+
+	stats.begin();
+
+	// monitored code goes here
+
+	stats.end();
+
+	requestAnimationFrame( animate );
+
+}
+
+requestAnimationFrame( animate );
+```
+
+
+
+#典型案例
+
+##刮刮乐游戏
+
+```js
+globalCompositeOperation = destination-out
+```
+
+<img src="/Users/wangjing/Documents/资料/MK image/Canvas_destination-out.png" style="zoom:50%;" />
+
+刮刮乐游戏的原理很简单，将要展示的图片放在下层，上层为普通canvas。现在canvas上绘制蒙层，然后改变 `globalCompositeOperation` 属性，然后在鼠标或者手势移动的地方绘制圆形，这样移动到的地方就会变透明露出真正想展示的内容。另外我们还可以通过 `imageData`  去计算透明比例。
+
+
+
+##鼠标跟随
+
+<p class="codepen" data-height="265" data-theme-id="light" data-default-tab="js,result" data-user="WJoan" data-slug-hash="vwGNqd" style="height: 265px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="[canvas]鼠标跟随效果">
+  <span>See the Pen <a href="https://codepen.io/WJoan/pen/vwGNqd">
+  [canvas]鼠标跟随效果</a> by Joan (<a href="https://codepen.io/WJoan">@WJoan</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+
+##粒子效果
+
+
+
+##图片放大器
+
+https://denzel.netlify.app/html/canvas_pixel_pick.html
+
+<p class="codepen" data-height="265" data-theme-id="light" data-default-tab="js,result" data-user="WJoan" data-slug-hash="OJyRXvK" style="height: 265px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="[canvas]图片放大器">
+  <span>See the Pen <a href="https://codepen.io/WJoan/pen/OJyRXvK">
+  [canvas]图片放大器</a> by Joan (<a href="https://codepen.io/WJoan">@WJoan</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+
+## 取色器
+
+<p class="codepen" data-height="265" data-theme-id="light" data-default-tab="js,result" data-user="WJoan" data-slug-hash="mderrQr" style="height: 265px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="[canvas]取色器">
+  <span>See the Pen <a href="https://codepen.io/WJoan/pen/mderrQr">
+  [canvas]取色器</a> by Joan (<a href="https://codepen.io/WJoan">@WJoan</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+
+##游戏
+
+- 赛车游戏（2019MFF）
+- 星球跑酷（2020MFF）
+
+<video src="/Users/wangjing/Documents/资料/MK image/game.mp4"></video>
+
+## 其他
+
+**移动端 click 事件 300ms 延迟**
+
+https://www.sitepoint.com/5-ways-prevent-300ms-click-delay-mobile-devices/
+
+**Chrome 浏览器 URL 栏导致卡屏滚动**
+
+https://developers.google.com/web/updates/2016/12/url-bar-resizing
+
+**使用 WebSocket**
+
+https://www.ruanyifeng.com/blog/2017/05/websocket.html
